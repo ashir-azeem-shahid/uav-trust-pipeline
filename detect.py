@@ -27,6 +27,7 @@ import time
 from collections import defaultdict
 
 import config as C
+from dq import DQValidator
 from rules import SuppressionDetector
 
 
@@ -41,8 +42,11 @@ class Pipeline:
     def __init__(self, streak: int = None) -> None:
         self.suppression = SuppressionDetector(
             streak if streak is not None else __import__("rules").DEFAULT_STREAK)
+        self.dq = DQValidator()
         self.verdicts_emitted = 0
         self.messages_seen = 0
+        self.quarantined = 0
+        self.dq_scores: list[float] = []
         self.already_flagged: set[str] = set()
         self.latencies: list[float] = []
 
@@ -57,8 +61,23 @@ class Pipeline:
         self.messages_seen += 1
 
         # ---- stage 1: DQ validation -------------------------------
-        # dq_scores = dq.evaluate(msg)
-        # if dq_scores["quarantine"]: return quarantine_verdict(...)
+        # Scored once per exchange, on the 'target' copy -- the initiator
+        # copy carries the same payload and would double-count.
+        dq_res = None
+        if msg["role"] == "target":
+            dq_res = self.dq.evaluate(msg)
+            self.dq_scores.append(dq_res.score)
+            if dq_res.quarantine:
+                self.quarantined += 1
+                self.latencies.append((time.perf_counter() - t_in) * 1000)
+                return {
+                    "drone": msg["contacted"],
+                    "t_session": msg["t_session"],
+                    "verdict": "QUARANTINE",
+                    "track": "DQ",
+                    "reason": "; ".join(dq_res.failed_rules),
+                    "dq_score": round(dq_res.score, 4),
+                }
 
         # ---- stage 2: trust ingest --------------------------------
         # trust = trust.validate(msg["trust"])
@@ -94,6 +113,9 @@ class Pipeline:
         return {
             "messages": self.messages_seen,
             "verdicts": self.verdicts_emitted,
+            "quarantined": self.quarantined,
+            "dq_mean": (sum(self.dq_scores) / len(self.dq_scores))
+                       if self.dq_scores else float("nan"),
             "per_msg_ms_p50": pct(0.50),
             "per_msg_ms_p95": pct(0.95),
             "per_msg_ms_p99": pct(0.99),
@@ -123,6 +145,8 @@ def run_offline(attack: str) -> None:
     print(f"\n  ground-truth victim : {victim}")
     print(f"  messages processed  : {s['messages']:,}")
     print(f"  verdicts emitted    : {s['verdicts']}")
+    print(f"  mean dq_score       : {s['dq_mean']:.4f}  "
+          f"(quarantined {s['quarantined']})")
     print(f"  per-message latency : p50 {s['per_msg_ms_p50']:.3f}ms  "
           f"p95 {s['per_msg_ms_p95']:.3f}ms  p99 {s['per_msg_ms_p99']:.3f}ms")
 
