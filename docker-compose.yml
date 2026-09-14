@@ -1,0 +1,60 @@
+services:
+
+  # Redpanda = Kafka, but a single binary with no ZooKeeper.
+  # Your Python talks the plain Kafka protocol, so this is swappable for
+  # MSK / Confluent / Azure Event Hubs with only config changes. That
+  # portability is the argument for self-managing it, not just the speed.
+  redpanda:
+    image: redpandadata/redpanda:v24.2.7
+    container_name: redpanda
+    command:
+      - redpanda
+      - start
+      - --smp=1                      # 1 CPU core is plenty at our volumes
+      - --memory=1G
+      - --overprovisioned            # expect a shared machine
+      - --node-id=0
+      - --check=false
+      # Two listeners: 'internal' for containers, 'external' for your Python
+      - --kafka-addr=internal://0.0.0.0:9092,external://0.0.0.0:19092
+      - --advertise-kafka-addr=internal://redpanda:9092,external://localhost:19092
+      - --rpc-addr=0.0.0.0:33145
+      - --advertise-rpc-addr=redpanda:33145
+    ports:
+      - "19092:19092"                # <-- your Python connects here
+      - "9644:9644"                  # admin API
+    healthcheck:
+      test: ["CMD-SHELL", "rpk cluster health | grep -q 'Healthy:.*true'"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  # Creates the two topics with the right partition count, then exits.
+  # Without this, auto-created topics get 1 partition and the scaling
+  # experiments have nothing to scale across.
+  init-topics:
+    image: redpandadata/redpanda:v24.2.7
+    container_name: redpanda-init
+    depends_on:
+      redpanda:
+        condition: service_healthy
+    entrypoint: ["/bin/bash", "-c"]
+    command:
+      - |
+        rpk topic create uav.telemetry -p 4 -r 1 --brokers redpanda:9092 || true
+        rpk topic create uav.verdict   -p 4 -r 1 --brokers redpanda:9092 || true
+        rpk topic list --brokers redpanda:9092
+    restart: "no"
+
+  # Web UI to SEE your messages. Useful for debugging, and the first
+  # screenshot for the thesis.
+  console:
+    image: redpandadata/console:v2.7.2
+    container_name: redpanda-console
+    depends_on:
+      redpanda:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    environment:
+      KAFKA_BROKERS: redpanda:9092
