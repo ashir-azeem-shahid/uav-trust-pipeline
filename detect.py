@@ -47,6 +47,7 @@ class Pipeline:
         self.messages_seen = 0
         self.quarantined = 0
         self.dq_scores: list[float] = []
+        self.last_dq = None          # most recent DQResult, for features.py
         self.already_flagged: set[str] = set()
         self.latencies: list[float] = []
 
@@ -66,6 +67,7 @@ class Pipeline:
         dq_res = None
         if msg["role"] == "target":
             dq_res = self.dq.evaluate(msg)
+            self.last_dq = dq_res
             self.dq_scores.append(dq_res.score)
             if dq_res.quarantine:
                 self.quarantined += 1
