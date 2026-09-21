@@ -1,18 +1,18 @@
-# Core pipeline
+# Pinned. The ML numbers move by ~0.08 F1 between scikit-learn versions on
+# a 107-window dataset, so the thesis figures are only reproducible with
+# these exact versions. Do not float them.
+
 confluent-kafka==2.5.3
-pandas>=2.2
-numpy>=1.26
+pandas==2.2.3
+numpy==1.26.4
 
-# ML (Track B) -- needed from train.py onwards
-scikit-learn>=1.5
-joblib>=1.4
+scikit-learn==1.5.2
+joblib==1.4.2
 
-# Dashboard
-streamlit>=1.38
+streamlit==1.38.0
 
-# Archive layer
-pyarrow>=17.0
-boto3>=1.35
+pyarrow==17.0.0
+boto3==1.35.36
+s3fs==2024.9.0
 
-# Tests
-pytest>=8.0
+pytest==8.3.3

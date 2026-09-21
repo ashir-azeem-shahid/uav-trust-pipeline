@@ -1,0 +1,21 @@
+
+==============================================================================
+  CriticalNode
+==============================================================================
+  107 windows, 25 malicious (23%), 54 observer groups
+  RF   full     P=0.7572 R=0.8320 F1=0.7901 +/-0.0213  (Fecak 0.6000, +0.1901)
+  RF   no_dq    P=0.7605 R=0.8720 F1=0.8115 +/-0.0317  (Fecak 0.6000, +0.2115)
+  RF   no_supp  P=0.6733 R=0.6640 F1=0.6671 +/-0.0640  (Fecak 0.6000, +0.0671)
+  RF   ABLATION  DQ contributes -0.0214 F1
+  RF   DQ share of importance: 0.9%, suppression share: 23.3%
+  RF   top features: ['max_streak_seen', 'timeout_rate', 'zero_trust_rate', 'Trust_BA_mean', 'Trust_BFM_mean']
+  SVM  full     P=0.7022 R=0.8160 F1=0.7528 +/-0.0208  (Fecak 0.7536, -0.0008)
+  SVM  no_dq    P=0.7442 R=0.7760 F1=0.7571 +/-0.0297  (Fecak 0.7536, +0.0035)
+  SVM  no_supp  P=0.6699 R=0.7440 F1=0.7033 +/-0.0397  (Fecak 0.7536, -0.0503)
+  SVM  ABLATION  DQ contributes -0.0043 F1
+
+==============================================================================
+  MITM
+==============================================================================
+  107 windows, 34 malicious (32%), 54 observer groups
+  RF   full     P=0.6512 R=0.7471 F1=0.6955 +/-0.0247  (Fecak 0.7654, -0.0699)

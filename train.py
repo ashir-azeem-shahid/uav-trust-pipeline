@@ -33,6 +33,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
 import warnings
 
@@ -71,13 +72,13 @@ QUICK_GRIDS = {
 }
 
 
-def make_model(kind: str):
+def make_model(kind: str, seed: int = RANDOM_STATE):
     if kind == "RF":
         clf = RandomForestClassifier(
-            random_state=RANDOM_STATE, class_weight="balanced", n_jobs=-1)
+            random_state=seed, class_weight="balanced", n_jobs=-1)
         return SKPipeline([("clf", clf)])
     clf = SVC(kernel="rbf", probability=True, class_weight="balanced",
-              random_state=RANDOM_STATE)
+              random_state=seed)
     return SKPipeline([("scale", StandardScaler()), ("clf", clf)])
 
 
@@ -101,7 +102,7 @@ def best_threshold(y_true, proba) -> float:
 
 
 def evaluate(rows, kind: str, include_dq: bool, include_supp: bool,
-             quick: bool = False) -> dict:
+             quick: bool = False, seed: int = RANDOM_STATE) -> dict:
     X, y, groups, names = F.to_matrix(rows, include_dq, include_supp)
     X = np.asarray(X, dtype=float)
     y = np.asarray(y, dtype=int)
@@ -111,7 +112,7 @@ def evaluate(rows, kind: str, include_dq: bool, include_supp: bool,
         return {"error": f"too few samples of one class ({y.sum()} positive)"}
 
     cv = StratifiedGroupKFold(n_splits=N_SPLITS, shuffle=True,
-                              random_state=RANDOM_STATE)
+                              random_state=seed)
     grid = (QUICK_GRIDS if quick else GRIDS)[kind]
 
     y_true_all, y_pred_all = [], []
@@ -123,9 +124,9 @@ def evaluate(rows, kind: str, include_dq: bool, include_supp: bool,
             continue
 
         search = GridSearchCV(
-            make_model(kind), grid, scoring="f1", n_jobs=-1,
+            make_model(kind, seed), grid, scoring="f1", n_jobs=-1,
             cv=StratifiedGroupKFold(n_splits=3, shuffle=True,
-                                    random_state=RANDOM_STATE),
+                                    random_state=seed),
             refit=True, error_score=0.0)
         search.fit(X[tr], y[tr], groups=groups[tr])
 
@@ -169,6 +170,45 @@ def evaluate(rows, kind: str, include_dq: bool, include_supp: bool,
     return out
 
 
+def evaluate_repeated(rows, kind: str, include_dq: bool, include_supp: bool,
+                      quick: bool = False, seeds: list[int] | None = None) -> dict:
+    """
+    Run the whole CV once per seed and report mean +/- std.
+
+    Necessary because a single split over ~107 windows is noisy: the same
+    command gave Critical Node RF F1 of 0.8214 on one machine and 0.7451 on
+    another, purely from library version and split luck. A thesis number
+    that moves by 0.08 depending on where it ran is not a result, so every
+    figure reported is a mean over several seeds with its spread shown.
+    """
+    seeds = seeds or [42, 7, 1234, 2025, 99]
+    runs = [evaluate(rows, kind, include_dq, include_supp, quick, s) for s in seeds]
+    ok = [r for r in runs if "f1" in r]
+    if not ok:
+        return runs[0]
+
+    def agg(field):
+        vals = [r[field] for r in ok]
+        return (sum(vals) / len(vals),
+                (sum((v - sum(vals) / len(vals)) ** 2 for v in vals) / len(vals)) ** 0.5)
+
+    f1_m, f1_s = agg("f1")
+    p_m, _ = agg("precision")
+    r_m, _ = agg("recall")
+    out = dict(ok[0])
+    out.update({
+        "f1": f1_m, "f1_std": f1_s, "precision": p_m, "recall": r_m,
+        "f1_runs": [round(r["f1"], 4) for r in ok],
+        "seeds": len(ok),
+    })
+    if "dq_importance_share" in ok[0]:
+        out["dq_importance_share"] = sum(
+            r["dq_importance_share"] for r in ok) / len(ok)
+        out["supp_importance_share"] = sum(
+            r["supp_importance_share"] for r in ok) / len(ok)
+    return out
+
+
 # Fecak's Table 8.2, for the side-by-side column.
 FECAK = {
     "MITM": {"RF": 0.7654, "SVM": 0.7805},
@@ -189,16 +229,39 @@ def main() -> None:
     ap.add_argument("--window-mode", default="15s", choices=["15s","session","both"],
                     help="'15s' = the real streaming task; 'session' = reproduces "
                          "Fecak's effective aggregation for a like-for-like table")
+    ap.add_argument("--seeds", type=int, default=5,
+                    help="number of random seeds to average over (1 = single run)")
+    ap.add_argument("--restart", action="store_true",
+                    help="ignore any existing output file and start over")
     ap.add_argument("--out", default="results_trackB.json")
     args = ap.parse_args()
+
+    # RESUMABLE RUNS
+    # A Codespace idles out on user inactivity, not CPU, so a long background
+    # job dies whenever you step away. Rather than shrink the experiment to
+    # fit that window, every (session, model, variant) cell is written to the
+    # output file the moment it completes, and an existing output file is
+    # loaded on start. Re-running the same command picks up where it stopped
+    # and costs at most one unfinished cell.
+    results: dict = {}
+    if os.path.exists(args.out) and not args.restart:
+        try:
+            with open(args.out) as fh:
+                results = json.load(fh)
+            done = sum(1 for s_ in results.values() if isinstance(s_, dict)
+                       for m_ in s_.values() if isinstance(m_, dict)
+                       for v_ in m_.values() if isinstance(v_, dict) and "f1" in v_)
+            if done:
+                print(f"resuming from {args.out} — {done} cell(s) already complete",
+                      flush=True)
+        except (json.JSONDecodeError, OSError):
+            results = {}
 
     sessions = args.sessions or list(C.ATTACK_SESSIONS)
     unknown = [s for s in sessions if s not in C.ATTACK_SESSIONS]
     if unknown:
         sys.exit(f"unknown session(s) {unknown}. "
                  f"Choose from: {', '.join(C.ATTACK_SESSIONS)}")
-    results: dict = {}
-
     for name in sessions:
         print(f"\n{'=' * 78}\n  {name}\n{'=' * 78}", flush=True)
         modes = ["15s","session"] if args.window_mode=="both" else [args.window_mode]
@@ -207,25 +270,39 @@ def main() -> None:
         print(f"  {len(rows)} windows, {pos} malicious ({pos/len(rows):.0%}), "
               f"{len({r['group'] for r in rows})} observer groups", flush=True)
 
-        results[name] = {"window_mode": modes[0]}
+        results.setdefault(name, {})["window_mode"] = modes[0]
         for kind in ("RF", "SVM"):
             variants = {
                 "full":    dict(include_dq=True,  include_supp=True),
                 "no_dq":   dict(include_dq=False, include_supp=True),
                 "no_supp": dict(include_dq=True,  include_supp=False),
             }
-            results[name][kind] = {}
+            results[name].setdefault(kind, {})
             for vname, kw in variants.items():
-                r = evaluate(rows, kind, quick=args.quick, **kw)
+                prev = results[name][kind].get(vname)
+                if isinstance(prev, dict) and "f1" in prev:
+                    ref0 = FECAK.get(name, {}).get(kind)
+                    d0 = f"  (Fecak {ref0:.4f}, {prev['f1']-ref0:+.4f})" if ref0 else ""
+                    sd0 = f" +/-{prev['f1_std']:.4f}" if "f1_std" in prev else ""
+                    print(f"  {kind:<4} {vname:<8} "
+                          f"P={prev['precision']:.4f} R={prev['recall']:.4f} "
+                          f"F1={prev['f1']:.4f}{sd0}{d0}   [cached]", flush=True)
+                    continue
+                seeds = [42, 7, 1234, 2025, 99][:max(1, args.seeds)]
+                r = evaluate_repeated(rows, kind, quick=args.quick,
+                                      seeds=seeds, **kw)
                 results[name][kind][vname] = r
+                with open(args.out, "w") as fh:          # checkpoint immediately
+                    json.dump(results, fh, indent=2, default=float)
                 if "error" in r:
                     print(f"  {kind:<4} {vname:<8} {r['error']}", flush=True)
                     continue
                 ref = FECAK.get(name, {}).get(kind)
                 delta = f"  (Fecak {ref:.4f}, {r['f1']-ref:+.4f})" if ref else ""
+                sd = f" +/-{r['f1_std']:.4f}" if "f1_std" in r else ""
                 print(f"  {kind:<4} {vname:<8} "
                       f"P={r['precision']:.4f} R={r['recall']:.4f} "
-                      f"F1={r['f1']:.4f}{delta}", flush=True)
+                      f"F1={r['f1']:.4f}{sd}{delta}", flush=True)
 
             full = results[name][kind].get("full", {})
             nodq = results[name][kind].get("no_dq", {})
@@ -257,7 +334,8 @@ def main() -> None:
                 continue
             ref = FECAK.get(name, {}).get(kind)
             print(f"  {name:<20} {kind:<5} {r['precision']:>7.4f} "
-                  f"{r['recall']:>7.4f} {r['f1']:>7.4f} "
+                  f"{r['recall']:>7.4f} {r['f1']:>7.4f}"
+                  f"{('+/-'+format(r['f1_std'],'.3f')) if 'f1_std' in r else '':>10} "
                   f"{(f'{ref:.4f}' if ref else '-'):>9} "
                   f"{(f'{r[chr(102)+chr(49)]-ref:+.4f}' if ref else '-'):>8}")
 

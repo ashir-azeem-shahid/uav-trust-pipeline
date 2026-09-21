@@ -1,0 +1,308 @@
+{
+  "detection_delay": [
+    {
+      "attack": "CriticalNode",
+      "victim": "Drone18",
+      "onset_s": 275,
+      "detected_at_s": 294,
+      "detection_delay_s": 19,
+      "false_positives": []
+    },
+    {
+      "attack": "MITM",
+      "victim": "Drone34",
+      "onset_s": 275,
+      "detected_at_s": null,
+      "detection_delay_s": null,
+      "false_positives": []
+    },
+    {
+      "attack": "DataManipulation",
+      "victim": "Drone35",
+      "onset_s": 275,
+      "detected_at_s": null,
+      "detection_delay_s": null,
+      "false_positives": []
+    },
+    {
+      "attack": "DataManipulation2",
+      "victim": "Drone37",
+      "onset_s": 275,
+      "detected_at_s": null,
+      "detection_delay_s": null,
+      "false_positives": []
+    },
+    {
+      "attack": "Sybil",
+      "victim": "Drone12",
+      "onset_s": 275,
+      "detected_at_s": null,
+      "detection_delay_s": null,
+      "false_positives": []
+    }
+  ],
+  "stage_latency": [
+    {
+      "attack": "CriticalNode",
+      "messages": 12886,
+      "dq": {
+        "p50": 0.015288000213331543,
+        "p95": 0.033954999707930256,
+        "p99": 0.045259999751579016,
+        "max": 1.024533999952837
+      },
+      "rule": {
+        "p50": 0.0010150006346520968,
+        "p95": 0.002380000296398066,
+        "p99": 0.0034750000850181095,
+        "max": 0.02129499989678152
+      },
+      "total": {
+        "p50": 0.008350999451067764,
+        "p95": 0.032746000215411186,
+        "p99": 0.04165700011071749,
+        "max": 1.0288370003763703
+      }
+    },
+    {
+      "attack": "MITM",
+      "messages": 12918,
+      "dq": {
+        "p50": 0.0157430004037451,
+        "p95": 0.0306330002786126,
+        "p99": 0.04119099958188599,
+        "max": 0.5236529996182071
+      },
+      "rule": {
+        "p50": 0.0009659997886046767,
+        "p95": 0.0019089993656962179,
+        "p99": 0.0027580008463701233,
+        "max": 0.02282799960084958
+      },
+      "total": {
+        "p50": 0.008380000508623198,
+        "p95": 0.028977000511076767,
+        "p99": 0.03829300021607196,
+        "max": 0.5283360005705617
+      }
+    },
+    {
+      "attack": "DataManipulation",
+      "messages": 12874,
+      "dq": {
+        "p50": 0.015454000276804436,
+        "p95": 0.031970999771147035,
+        "p99": 0.0414080004702555,
+        "max": 1.1133280004287371
+      },
+      "rule": {
+        "p50": 0.0009940004019881599,
+        "p95": 0.002132999725290574,
+        "p99": 0.0030530000003636815,
+        "max": 0.040330999581783544
+      },
+      "total": {
+        "p50": 0.008370000614377204,
+        "p95": 0.02929600032075541,
+        "p99": 0.03999799992016051,
+        "max": 1.1180290002812399
+      }
+    },
+    {
+      "attack": "DataManipulation2",
+      "messages": 13256,
+      "dq": {
+        "p50": 0.015407999853778165,
+        "p95": 0.035893999665859155,
+        "p99": 0.05026500002713874,
+        "max": 0.5389680000007502
+      },
+      "rule": {
+        "p50": 0.0010670000847312622,
+        "p95": 0.002502999450371135,
+        "p99": 0.0036080000427318737,
+        "max": 0.378678999368276
+      },
+      "total": {
+        "p50": 0.008405999324168079,
+        "p95": 0.03444199955993099,
+        "p99": 0.04884200006927131,
+        "max": 0.5444460002763662
+      }
+    },
+    {
+      "attack": "Sybil",
+      "messages": 19836,
+      "dq": {
+        "p50": 0.007180000466178171,
+        "p95": 0.02742300057434477,
+        "p99": 0.03678400025819428,
+        "max": 2.4329200005013263
+      },
+      "rule": {
+        "p50": 0.0010490002750884742,
+        "p95": 0.0022240001271711662,
+        "p99": 0.003056999958062079,
+        "max": 0.06400500024028588
+      },
+      "total": {
+        "p50": 0.008377000085602049,
+        "p95": 0.02269200012960937,
+        "p99": 0.03589199968700996,
+        "max": 2.437680999719305
+      }
+    }
+  ],
+  "throughput": {
+    "CriticalNode": [
+      {
+        "drones": 5,
+        "messages": 362,
+        "seconds": 0.0028,
+        "msg_per_s": 130535.2,
+        "us_per_msg": 7.66
+      },
+      {
+        "drones": 10,
+        "messages": 1054,
+        "seconds": 0.0068,
+        "msg_per_s": 154302.2,
+        "us_per_msg": 6.48
+      },
+      {
+        "drones": 25,
+        "messages": 3880,
+        "seconds": 0.0347,
+        "msg_per_s": 111839.8,
+        "us_per_msg": 8.94
+      },
+      {
+        "drones": 50,
+        "messages": 11912,
+        "seconds": 0.0627,
+        "msg_per_s": 190024.5,
+        "us_per_msg": 5.26
+      }
+    ],
+    "MITM": [
+      {
+        "drones": 5,
+        "messages": 354,
+        "seconds": 0.0043,
+        "msg_per_s": 82879.5,
+        "us_per_msg": 12.07
+      },
+      {
+        "drones": 10,
+        "messages": 976,
+        "seconds": 0.0068,
+        "msg_per_s": 144090.9,
+        "us_per_msg": 6.94
+      },
+      {
+        "drones": 25,
+        "messages": 3776,
+        "seconds": 0.0237,
+        "msg_per_s": 159618.4,
+        "us_per_msg": 6.26
+      },
+      {
+        "drones": 50,
+        "messages": 11632,
+        "seconds": 0.0788,
+        "msg_per_s": 147608.7,
+        "us_per_msg": 6.77
+      }
+    ],
+    "DataManipulation": [
+      {
+        "drones": 5,
+        "messages": 460,
+        "seconds": 0.0035,
+        "msg_per_s": 131194.5,
+        "us_per_msg": 7.62
+      },
+      {
+        "drones": 10,
+        "messages": 1120,
+        "seconds": 0.0075,
+        "msg_per_s": 149673.9,
+        "us_per_msg": 6.68
+      },
+      {
+        "drones": 25,
+        "messages": 3648,
+        "seconds": 0.0218,
+        "msg_per_s": 167003.5,
+        "us_per_msg": 5.99
+      },
+      {
+        "drones": 50,
+        "messages": 11834,
+        "seconds": 0.0722,
+        "msg_per_s": 163985.1,
+        "us_per_msg": 6.1
+      }
+    ],
+    "DataManipulation2": [
+      {
+        "drones": 5,
+        "messages": 350,
+        "seconds": 0.003,
+        "msg_per_s": 117922.0,
+        "us_per_msg": 8.48
+      },
+      {
+        "drones": 10,
+        "messages": 1030,
+        "seconds": 0.0068,
+        "msg_per_s": 150818.6,
+        "us_per_msg": 6.63
+      },
+      {
+        "drones": 25,
+        "messages": 3682,
+        "seconds": 0.0225,
+        "msg_per_s": 163891.6,
+        "us_per_msg": 6.1
+      },
+      {
+        "drones": 50,
+        "messages": 12220,
+        "seconds": 0.0693,
+        "msg_per_s": 176444.3,
+        "us_per_msg": 5.67
+      }
+    ],
+    "Sybil": [
+      {
+        "drones": 5,
+        "messages": 374,
+        "seconds": 0.0031,
+        "msg_per_s": 122568.1,
+        "us_per_msg": 8.16
+      },
+      {
+        "drones": 10,
+        "messages": 1314,
+        "seconds": 0.0074,
+        "msg_per_s": 177271.0,
+        "us_per_msg": 5.64
+      },
+      {
+        "drones": 25,
+        "messages": 9990,
+        "seconds": 0.0352,
+        "msg_per_s": 283692.6,
+        "us_per_msg": 3.52
+      },
+      {
+        "drones": 50,
+        "messages": 15976,
+        "seconds": 0.0692,
+        "msg_per_s": 230928.3,
+        "us_per_msg": 4.33
+      }
+    ]
+  }
+}
