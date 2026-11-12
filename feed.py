@@ -6,7 +6,12 @@ without running Streamlit.
 
 Holds live state built from the two Kafka topics:
   uav.telemetry  -> per-drone trust trajectory, DQ scores, streak
-  uav.verdict    -> the alert feed an operator acts on
+  uav.verdict    -> the alert feed an operator acts on, plus the ML models'
+                    per-window readings (verdict "SCORE")
+
+Signals about the same drone -- the rule, the classifier, the anomaly
+detector -- are grouped into one INCIDENT per drone, so the operator sees
+"Drone18: three independent signals" and decides once.
 
 Operator decisions go back out to uav.operator, which makes the
 accept/reject loop measurable rather than cosmetic: every verdict gets a
@@ -24,6 +29,7 @@ from dataclasses import dataclass, field
 import config as C
 
 TOPIC_OPERATOR = "uav.operator"
+TOPIC_ACTION = "uav.action"
 TRAJECTORY_POINTS = 400
 DQ_DIMENSIONS = ["completeness", "validity", "timeliness", "uniqueness", "consistency"]
 RATE_WINDOW_S = 5.0
@@ -50,6 +56,12 @@ class DroneView:
     dq_flagged: int = 0          # records with at least one failed DQ rule
     dq_quarantined: int = 0
     dq_issues: Counter = field(default_factory=Counter)   # dimension -> count
+    watch: bool = False          # anomaly-only incident: investigate
+    isolated: bool = False       # the responder (or an operator) isolated it
+    ml_p: float | None = None    # latest classifier P(compromised)
+    ml_anomalous: bool | None = None   # latest window above anomaly threshold
+    ml_anomaly_ratio: float | None = None  # score / threshold (>1 = unusual)
+    ml_hist: deque = field(default_factory=lambda: deque(maxlen=TRAJECTORY_POINTS))
 
     @property
     def timeout_rate(self) -> float:
@@ -62,8 +74,12 @@ class DroneView:
     @property
     def band(self) -> str:
         """Trust band from the last ANSWERED exchange (timeouts carry no score)."""
+        if self.isolated:
+            return "ISOLATED"
         if self.flagged:
             return "FLAGGED"
+        if self.watch:
+            return "WATCH"
         t = self.last_trust
         if t is None:
             return "UNKNOWN"
@@ -84,12 +100,19 @@ class Verdict:
     detection_delay_s: int | None = None
     dq_score: float | None = None
     partition: int | None = None
+    anomaly_score: float | None = None
+    p_compromised: float | None = None
+    window_start: int | None = None
     decision: str | None = None        # operator: ACCEPT / REJECT / None
     decided_at: float | None = None
 
     @property
     def vid(self) -> str:
         return f"{self.drone}@{self.t_session}:{self.track}"
+
+    @property
+    def kind(self) -> str:
+        return SIGNAL_NAME.get(self.track, self.track)
 
     @property
     def actionable(self) -> bool:
@@ -103,6 +126,54 @@ class Verdict:
         return bool(self.reason and self.reason.strip())
 
 
+SIGNAL_NAME = {"A": "Rule", "B-RF": "Classifier", "B-IF": "Anomaly",
+               "DQ": "Data quality"}
+# Signals that raise an ALERT. The anomaly detector alone raises a WATCH:
+# it notices that something is unusual, not that a drone is compromised.
+ALERT_TRACKS = {"A", "B-RF"}
+
+
+@dataclass
+class Incident:
+    """Everything the pipeline has said about one drone, as one case."""
+    drone: str
+    first_t: int
+    signals: list = field(default_factory=list)       # Verdicts, in order
+    partition: int | None = None
+    decision: str | None = None         # ACCEPT / REJECT, by the operator
+    decided_at: float | None = None
+    decided_by: str | None = None       # "operator" or "auto"
+    # from respond.py via uav.action (live mode only)
+    action: str | None = None           # ISOLATE_PENDING / ISOLATED / ...
+    action_by: str | None = None
+    action_at: float | None = None
+    due_at: float | None = None
+    seconds_to_action: float | None = None   # alert -> isolation, measured
+
+    @property
+    def iid(self) -> str:
+        return f"{self.drone}@{self.first_t}"
+
+    @property
+    def severity(self) -> str:
+        return ("alert" if any(v.track in ALERT_TRACKS for v in self.signals)
+                else "watch")
+
+    @property
+    def tracks(self) -> list[str]:
+        return [v.track for v in self.signals]
+
+    @property
+    def first_delay_s(self) -> int | None:
+        ds = [v.detection_delay_s for v in self.signals
+              if v.detection_delay_s is not None]
+        return min(ds) if ds else None
+
+    @property
+    def actionable(self) -> bool:
+        return all(v.actionable for v in self.signals)
+
+
 class LiveState:
     """
     Accumulates dashboard state. Fed either from Kafka or, for development
@@ -112,6 +183,9 @@ class LiveState:
     def __init__(self) -> None:
         self.drones: dict[str, DroneView] = defaultdict(DroneView)
         self.verdicts: list[Verdict] = []
+        self.incidents: dict[str, Incident] = {}      # drone -> incident
+        self.ml_windows: int = 0                      # ML readings received
+        self.actions: list[dict] = []                 # from uav.action
         self.onset: int | None = None
         self.clock: int = 0
         self.messages: int = 0
@@ -249,7 +323,18 @@ class LiveState:
         rows.sort(key=lambda r: (r["mean_dq"], -r["flagged"]))
         return rows
 
-    def apply_verdict(self, v: dict) -> Verdict:
+    def apply_verdict(self, v: dict) -> Verdict | None:
+        if v.get("verdict") == "SCORE":
+            # an ML reading for one drone's window, not an alert
+            d = self.drones[v["drone"]]
+            d.drone = v["drone"]
+            d.ml_p = v.get("p_compromised")
+            d.ml_anomalous = v.get("anomalous")
+            thr = v.get("anomaly_threshold") or 0
+            d.ml_anomaly_ratio = (v["anomaly_score"] / thr) if thr else None
+            d.ml_hist.append((v.get("t_session", 0), d.ml_p))
+            self.ml_windows += 1
+            return None
         ver = Verdict(
             drone=v["drone"],
             t_session=v.get("t_session", 0),
@@ -259,38 +344,97 @@ class LiveState:
             detection_delay_s=v.get("detection_delay_s"),
             dq_score=v.get("dq_score"),
             partition=v.get("partition"),
+            anomaly_score=v.get("anomaly_score"),
+            p_compromised=v.get("p_compromised"),
+            window_start=v.get("window_start"),
         )
         self.verdicts.append(ver)
         if ver.verdict == "QUARANTINE":
             self.quarantined += 1
-        else:
-            self.drones[ver.drone].flagged = True
+            return ver
+        inc = self.incidents.get(ver.drone)
+        if inc is None:
+            inc = self.incidents[ver.drone] = Incident(ver.drone, ver.t_session)
+        inc.signals.append(ver)
+        if inc.partition is None:
+            inc.partition = ver.partition
+        d = self.drones[ver.drone]
+        d.drone = ver.drone
+        if inc.decision != "REJECT":
+            d.flagged = inc.severity == "alert"
+            d.watch = inc.severity == "watch"
         return ver
 
     # -- operator loop -------------------------------------------------
-    def decide(self, vid: str, decision: str) -> Verdict | None:
-        """Record an operator's accept/reject on one verdict."""
-        for v in self.verdicts:
-            if v.vid == vid:
-                v.decision = decision
-                v.decided_at = time.time()
+    def decide(self, iid: str, decision: str,
+               by: str = "operator") -> Incident | None:
+        """Record an accept/reject on one incident (all its signals)."""
+        for inc in self.incidents.values():
+            if inc.iid == iid:
+                inc.decision = decision
+                inc.decided_at = time.time()
+                inc.decided_by = by
+                for v in inc.signals:
+                    v.decision, v.decided_at = decision, inc.decided_at
+                d = self.drones[inc.drone]
                 if decision == "REJECT":
-                    self.drones[v.drone].flagged = False
-                return v
+                    d.flagged = d.watch = False
+                    inc.action, inc.due_at = "CANCELLED", None
+                elif decision == "ACCEPT":
+                    d.isolated = True
+                    inc.action, inc.due_at = "ISOLATED", None
+                elif decision == "RELEASE":
+                    d.isolated = d.flagged = d.watch = False
+                    inc.action = "RELEASED"
+                inc.action_by, inc.action_at = by, inc.decided_at
+                return inc
         return None
+
+    def apply_action(self, a: dict) -> None:
+        """An action published by respond.py (or after an operator decision)."""
+        drone = a.get("drone")
+        inc = self.incidents.get(drone)
+        if inc is None:
+            return
+        inc.action, inc.action_by, inc.action_at = a["action"], a.get("by"), a.get("at")
+        if a["action"] == "ISOLATE_PENDING":
+            inc.due_at = a.get("due_at")
+        elif a["action"] != "AWAITING_OPERATOR":
+            inc.due_at = None
+        if a["action"] == "ISOLATED":
+            inc.seconds_to_action = a.get("seconds_since_alert")
+            if inc.decision is None:
+                inc.decision, inc.decided_by = "ACCEPT", a.get("by")
+                inc.decided_at = a.get("at")
+        if a["action"] == "CANCELLED" and inc.decision is None:
+            inc.decision, inc.decided_by, inc.decided_at = "REJECT", a.get("by"), a.get("at")
+        d = self.drones[drone]
+        d.isolated = a["action"] == "ISOLATED"
+        if a["action"] in ("CANCELLED", "RELEASED"):
+            d.flagged = d.watch = False
+        self.actions.append(a)
+
+    def incident_list(self) -> list[Incident]:
+        """Alerts first, then watches; newest first within each."""
+        return sorted(self.incidents.values(),
+                      key=lambda i: (i.severity != "alert", -i.first_t))
 
     # -- summaries the UI renders --------------------------------------
     def alert_summary(self) -> dict:
-        alerts = [v for v in self.verdicts if v.verdict != "QUARANTINE"]
-        actionable = [v for v in alerts if v.actionable]
-        decided = [v for v in alerts if v.decision]
+        incs = list(self.incidents.values())
+        alerts = [i for i in incs if i.severity == "alert"]
+        actionable = [i for i in incs if i.actionable]
+        decided = [i for i in incs if i.decision]
         return {
             "alerts": len(alerts),
+            "watch": len(incs) - len(alerts),
+            "signals": sum(len(i.signals) for i in incs),
             "actionable": len(actionable),
-            "actionable_pct": (len(actionable) / len(alerts) * 100) if alerts else 0.0,
-            "accepted": sum(1 for v in decided if v.decision == "ACCEPT"),
-            "rejected": sum(1 for v in decided if v.decision == "REJECT"),
-            "pending": len(alerts) - len(decided),
+            "actionable_pct": (len(actionable) / len(incs) * 100) if incs else 0.0,
+            "decided": len(decided),
+            "accepted": sum(1 for i in decided if i.decision == "ACCEPT"),
+            "rejected": sum(1 for i in decided if i.decision == "REJECT"),
+            "pending": len(incs) - len(decided),
             "quarantined": self.quarantined,
         }
 
@@ -307,6 +451,9 @@ class LiveState:
                 "streak": d.streak,
                 "max_streak": d.max_streak,
                 "exchanges": d.n_target,
+                "p_compromised": d.ml_p,
+                "anomaly": (None if d.ml_anomalous is None
+                            else ("unusual" if d.ml_anomalous else "normal")),
             })
         rows.sort(key=lambda r: (-r["max_streak"], -r["timeout_rate"]))
         return rows
@@ -341,7 +488,7 @@ class KafkaFeed:
             "auto.offset.reset": start,
             "enable.auto.commit": True,
         })
-        self.consumer.subscribe([C.TOPIC_TELEMETRY, C.TOPIC_VERDICT])
+        self.consumer.subscribe([C.TOPIC_TELEMETRY, C.TOPIC_VERDICT, TOPIC_ACTION])
         self.producer = Producer({"bootstrap.servers": bootstrap})
 
     def drain(self, state: LiveState, max_messages: int = 4000,
@@ -365,6 +512,8 @@ class KafkaFeed:
             payload = json.loads(rec.value())
             if rec.topic() == C.TOPIC_VERDICT:
                 state.apply_verdict(payload)
+            elif rec.topic() == TOPIC_ACTION:
+                state.apply_action(payload)
             else:
                 dq_res = None
                 if payload.get("role") == "target":
@@ -378,7 +527,7 @@ class KafkaFeed:
         state.mark_rate()
         return n
 
-    def publish_decision(self, v: Verdict) -> str | None:
+    def publish_decision(self, inc: Incident) -> str | None:
         """
         Publish an operator decision to uav.operator and wait for the broker
         to confirm it. Returns None on success, or the error text -- so the
@@ -392,15 +541,16 @@ class KafkaFeed:
 
         self.producer.produce(
             TOPIC_OPERATOR,
-            key=v.drone.encode(),
+            key=inc.drone.encode(),
             value=json.dumps({
-                "drone": v.drone,
-                "verdict_id": v.vid,
-                "track": v.track,
-                "decision": v.decision,
-                "reason_shown": v.reason,
-                "actionable": v.actionable,
-                "decided_at": v.decided_at,
+                "drone": inc.drone,
+                "incident_id": inc.iid,
+                "tracks": inc.tracks,
+                "decision": inc.decision,
+                "decided_by": inc.decided_by,
+                "reasons_shown": [v.reason for v in inc.signals],
+                "actionable": inc.actionable,
+                "decided_at": inc.decided_at,
             }).encode(),
             on_delivery=on_delivery,
         )
@@ -418,7 +568,7 @@ class KafkaFeed:
 # ---------------------------------------------------------------------
 def build_offline(attack: str, until: int | None = None,
                   fault: str | None = None, fault_rate: float = 0.05,
-                  fault_seed: int = 7) -> LiveState:
+                  fault_seed: int = 7, ml: bool = False) -> LiveState:
     """
     Same state the live feed builds, straight from the recorded session.
     fault optionally injects one benign fault type (see faults.py) into a
@@ -429,7 +579,7 @@ def build_offline(attack: str, until: int | None = None,
     from detect import Pipeline
 
     state = LiveState()
-    pipe = Pipeline()
+    pipe = Pipeline(ml=ml)
 
     stream = F.inject(R.replay_with_onset(attack), fault, fault_rate, fault_seed)
     for _key, msg, _onset, _is_fault in stream:
@@ -443,4 +593,10 @@ def build_offline(attack: str, until: int | None = None,
             state.attack_type = msg["_gt"]["attack_type"]
         if v:
             state.apply_verdict(v)
+        for mv in pipe.drain_ml():
+            state.apply_verdict(mv)
+    if until is None:
+        pipe.finish()
+        for mv in pipe.drain_ml():
+            state.apply_verdict(mv)
     return state

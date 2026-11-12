@@ -1,7 +1,23 @@
 # uav-trust-pipeline
 
 Cloud-native streaming pipeline for data quality and trust classification of
-autonomous UAV telemetry.
+autonomous UAV telemetry: data quality checks, a deterministic attack rule
+and two machine learning models run on every drone as its telemetry
+arrives, and a responder acts on alerts by itself while an operator can
+override.
+
+```
+produce.py ─► Kafka uav.telemetry (4 partitions, keyed by drone)
+                 │
+                 ▼
+           detect.py --ml   data quality ─► suppression rule ─► ML per 15 s window
+                 │                                   (Isolation Forest + Random Forest)
+                 ▼
+           Kafka uav.verdict ─► respond.py ─► Kafka uav.action   (auto-isolation)
+                 │                   ▲
+                 ├─► app.py ─────────┴── Kafka uav.operator      (human override)
+                 └─► sink.py ─► S3 Parquet
+```
 
 Master's thesis, Masaryk University FI. Builds on Matej Fečák's bachelor
 thesis (*A Digital Twin Framework for Trust Evaluation of Autonomous
@@ -52,7 +68,10 @@ Redpanda Console on <http://localhost:8080> shows the messages.
 | `produce.py` | Stream → Kafka, keyed by the drone under evaluation. `--speed` paces it, `--fault` injects benign faults, `--dry-run` needs no broker. |
 | `dq.py` | Stage 1: data quality. Five dimensions per record, thresholds fitted on the clean baseline, quarantine for unusable records. |
 | `rules.py` | Track A: the suppression rule, as streaming state. |
-| `detect.py` | The consumer: data quality → suppression rule → verdicts to `uav.verdict`. |
+| `detect.py` | The consumer: data quality → suppression rule → ML (`--ml`) → verdicts to `uav.verdict`. |
+| `ml.py` | Track B live: per-drone 15 s windows built inside the pipeline, Isolation Forest + Random Forest scoring, explained alerts. One feature code path for training and serving. |
+| `train_ml.py` | Trains and evaluates the live models (leave-one-attack-out, held-out clean recording), writes `models/ml.joblib`. |
+| `respond.py` | Autonomous responder: isolates a drone on a rule alert after a grace period unless an operator holds it; classifier alerts wait for an operator. Writes `uav.action`. |
 | `faults.py` | Benign fault definitions (noise, out-of-range, corrupt trust, dropout, duplicate, position jump). |
 | `features.py` | 15-second windows and features for the models; reproduces the bachelor thesis's windowing for comparison. |
 | `train.py` | Track B: supervised Random Forest / SVM with feature-group ablation. |
@@ -60,9 +79,10 @@ Redpanda Console on <http://localhost:8080> shows the messages.
 | `feed.py`, `app.py` | Operator dashboard (Streamlit): live from Kafka or from a recorded session. |
 | `evaluate.py` | Detection delay, per-stage processing latency, compute-only throughput. |
 | `tools/scale_test.py` | Scalability and latency through Kafka: consumers, swarm size, paced latency. |
-| `tools/anomaly.py` | Unsupervised anomaly detection: Isolation Forest trained on clean traffic only. |
+| `tools/anomaly.py` | Isolation Forest on the bachelor thesis's observer windows (comparison). |
+| `tools/train_scale.py` | Training scalability: the ML retrained on 1×–30× the data. |
 | `tools/fault_inject.py` | How the data quality layer handles each benign fault. |
-| `tools/live_demo.sh` | The whole pipeline live: broker, detector, dashboard, producer. |
+| `tools/live_demo.sh` | The whole pipeline live: broker, detector with ML, responder, dashboard, producer. |
 | `tools/run_experiments.sh` | The broker-free experiments in one go. |
 | `tools/analysis3.py` | Data diagnostics — the go/no-go test on the raw CSVs. |
 | `tools/simulate.py` | Replays through simulated partitioned consumers. Proves the architecture before Kafka. |
@@ -78,16 +98,21 @@ bash tools/live_demo.sh                  # clean Critical Node session at 10x
 bash tools/live_demo.sh trust_corrupt    # with a benign fault on 5% of records
 ```
 
-Starts the broker, the detector and the dashboard (port 8501), resets the
-topics, then replays the session. In the dashboard choose *Live stream
-(Kafka)* → *New messages only* → *Connect* before starting the replay.
+Starts the broker, the detector (rule + DQ + ML), the responder and the
+dashboard (port 8501), trains the models if `models/ml.joblib` is missing,
+resets the topics, then replays the session. In the dashboard choose *Live
+stream (Kafka)* → *New messages only* → *Connect* before starting the replay.
+With nobody touching anything, the attacked drone is isolated about 10 s
+after the rule's alert; `GRACE=20` lengthens the override window.
 
 ---
 
 ## Experiments
 
 ```bash
-bash tools/run_experiments.sh                               # tests, faults, anomaly
+bash tools/run_experiments.sh                               # tests, faults, anomaly, ML
+python tools/train_scale.py                                 # training at 1x-30x data
+python tools/scale_test.py swarm --copies 1 8 32 --ml       # throughput with ML on
 python tools/scale_test.py consumers --copies 64 --consumers 1 2 4 --reps 3
 python tools/scale_test.py swarm --copies 1 2 4 8 16 32 64 --reps 3
 python tools/scale_test.py latency
@@ -174,3 +199,39 @@ msg/s once runs are long enough to amortise start-up.
 Send-to-verdict latency, producer and consumer running concurrently at a
 paced rate, one consumer: median 1.3–1.4 ms and p99 under 3.5 ms up to
 20,000 msg/s; at 50,000 msg/s median 1.7 ms, p99 26 ms.
+
+### Machine learning in the stream (Track B)
+
+`python train_ml.py`. Per drone, per 15 s window, 47 features, built by the
+live pipeline itself. Every number is for data the model was not trained on.
+
+| Attack | Isolation Forest AUC | attacked drone alerted | Random Forest AUC (attack type unseen) | attacked drone alerted |
+|---|---|---|---|---|
+| Critical Node | 0.94 | yes, 25 s | 1.00 | yes, 190 s |
+| MITM | 0.91 | yes, 85 s | 0.78 | no |
+| Data manipulation | 0.89 | yes, 25 s | 0.91 | yes, 10 s |
+| Data manipulation 2 | 0.97 | yes, 25 s | 1.00 | yes, 10 s |
+| Sybil | 1.00 | 8 of 8, 25 s | 1.00 | 8 of 8, 10 s |
+
+False alarms on a second clean recording: 0 windows, 0 drones (both
+models). The anomaly detector also puts 0–6 honest drones per attack session
+on the watch list — drones disturbed by the attack — which is why it never
+triggers an action on its own. The deployed classifier is trained without
+Critical Node, so the live demo shows it on a recording it never saw.
+
+### Training scalability
+
+`python tools/train_scale.py` (development machine, 2 CPUs). The swarm is
+cloned as in the swarm experiment; accuracy is measured on the same
+original-size test data at every size.
+
+| Data | Messages | Windows | Feature extraction | RF fit | Peak memory | RF AUC (unseen attack) |
+|---|---|---|---|---|---|---|
+| 1× | 83,906 | 3,146 | 5.5 s | 0.5 s | 172 MB | 0.93 |
+| 10× | 839,060 | 31,460 | 21 s | 1.1 s | 236 MB | 0.90 |
+| 30× | 2,517,180 | 94,380 | 54 s | 2.4 s | 396 MB | 0.90 |
+
+Cost grows at most linearly; accuracy is stable. Clones add no new
+information, so this shows the training path scales, not that more data
+improves the models. The Isolation Forest's fit time is nearly constant by
+design: each tree is built from a fixed 256-sample subsample.

@@ -90,6 +90,9 @@ os.chdir(ROOT)  # config.py paths (bsc-reference/...) are relative to the repo
 
 import config as C  # noqa: E402
 
+# Include the ML stage (Track B) in every consumer? Set by --ml in main().
+_ML = os.environ.get("UAV_SCALE_ML") == "1"
+
 
 # ---------------------------------------------------------------------
 # building the swarm
@@ -257,7 +260,7 @@ def _drain_kafka(topic, parts, barrier, q, idx):
             high[p] = hi
         consumer.assign([TopicPartition(topic, p, OFFSET_BEGINNING) for p in parts])
 
-        pipe = Pipeline()
+        pipe = Pipeline(ml=_ML)
         pending = {p for p in parts if high[p] > 0}
         n = verdicts = 0
 
@@ -281,7 +284,8 @@ def _drain_kafka(topic, parts, barrier, q, idx):
             for m in batch:
                 if m.error():
                     continue
-                v = pipe.handle(json.loads(m.value()))
+                v = pipe.handle(json.loads(m.value()), m.partition())
+                pipe.ml_pending.clear()     # ML verdicts are not counted here
                 n += 1
                 if v and v.get("verdict") == "SUPPRESSION":
                     verdicts += 1
@@ -308,12 +312,13 @@ def _drain_offline(attack, copies, partitions, parts, barrier, q, idx):
                if offline_partition(k, partitions) in wanted]
         del base
 
-        pipe = Pipeline()
+        pipe = Pipeline(ml=_ML)
         n = verdicts = 0
         barrier.wait(timeout=600)
         t0 = time.monotonic()
         for value in raw:
             v = pipe.handle(json.loads(value))
+            pipe.ml_pending.clear()
             n += 1
             if v and v.get("verdict") == "SUPPRESSION":
                 verdicts += 1
@@ -573,7 +578,7 @@ def _latency_consumer(topic, partitions, expected, warmup_n, ready, q):
         consumer.assign([TopicPartition(topic, p, OFFSET_BEGINNING)
                          for p in range(partitions)])
         consumer.poll(0.5)            # open fetch sessions while the topic is empty
-        pipe = Pipeline()
+        pipe = Pipeline(ml=_ML)
         ready.set()
 
         lat = []
@@ -589,7 +594,8 @@ def _latency_consumer(topic, partitions, expected, warmup_n, ready, q):
             if m.error():
                 continue
             last = now
-            pipe.handle(json.loads(m.value()))
+            pipe.handle(json.loads(m.value()), m.partition())
+            pipe.ml_pending.clear()
             done = time.time()
             n += 1
             if n > warmup_n:
@@ -714,6 +720,8 @@ def main() -> None:
         p.add_argument("--keep", action="store_true",
                        help="don't delete the test topics afterwards")
         p.add_argument("--out", default=None, help="results file (JSON)")
+        p.add_argument("--ml", action="store_true",
+                       help="include the ML stage (models/ml.joblib) in every consumer")
 
     pc = sub.add_parser("consumers", help="throughput vs number of consumers")
     pc.add_argument("--copies", type=int, default=32)
@@ -731,8 +739,12 @@ def main() -> None:
     common(pl)
 
     args = ap.parse_args()
+    if args.ml:
+        # read by the worker processes (spawned, so they inherit the env)
+        os.environ["UAV_SCALE_ML"] = "1"
     env = environment(args)
-    print(f"\n  {args.cmd} experiment · {env['mode']} · "
+    env["ml_stage"] = bool(args.ml)
+    print(f"\n  {args.cmd} experiment{' with the ML stage' if args.ml else ''} · {env['mode']} · "
           f"{env['cpus_usable']} usable CPUs · {env['machine'] or platform.node()}\n")
 
     t0 = time.monotonic()
@@ -741,7 +753,8 @@ def main() -> None:
     result["environment"] = env
     result["total_seconds"] = round(time.monotonic() - t0, 1)
 
-    out = args.out or f"results_scaling_{args.cmd}{'_offline' if args.offline else ''}.json"
+    out = args.out or (f"results_scaling_{args.cmd}{'_offline' if args.offline else ''}"
+                       f"{'_ml' if args.ml else ''}.json")
     Path(out).write_text(json.dumps(result, indent=2))
     print(f"\n  saved {out}  ({result['total_seconds']}s total)\n")
 

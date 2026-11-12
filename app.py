@@ -40,6 +40,7 @@ import streamlit as st
 import config as C
 import rules as RL
 from feed import DQ_DIMENSIONS, LiveState, build_offline
+from ml import MODEL_PATH
 
 st.set_page_config(page_title="UAV Trust Pipeline", layout="wide")
 
@@ -74,16 +75,26 @@ DIM_HELP = {
     "consistency": "Speed implied by consecutive positions is physically possible "
                    "(<= 15 m/s) and agrees with the declared speed.",
 }
-STATUS_HELP = ("FLAGGED: the suppression rule fired for this drone. "
+STATUS_HELP = ("ISOLATED: no longer trusted -- isolated automatically or by "
+               "an operator. FLAGGED: an attack alert from the rule or the "
+               "classifier. WATCH: the anomaly detector finds its traffic unusual. "
                "TRUSTED / DEGRADED / LOW: the trust score of the drone's last "
                "answered exchange (>= 0.6, >= 0.3, below). UNKNOWN: no answered "
                "exchange yet.")
 TRUST_NOTE = ("Timeouts are not scored here: the recording gives them a trust "
               "score of 0 because there is no data to assess. They count in "
               "the streak and the Unanswered share instead.")
-STATUS_COLOR = {"FLAGGED": "#b91c1c", "LOW": "#c2410c", "DEGRADED": "#a16207",
-                "TRUSTED": "#15803d", "UNKNOWN": "#64748b"}
-SERIES_COLOR = {"Trust score": "#2563eb", "DQ score": "#94a3b8"}
+STATUS_COLOR = {"ISOLATED": "#7c3aed", "FLAGGED": "#b91c1c", "WATCH": "#0e7490",
+                "LOW": "#c2410c", "DEGRADED": "#a16207", "TRUSTED": "#15803d",
+                "UNKNOWN": "#64748b"}
+SIGNAL_LABEL = {"A": "Rule", "B-RF": "Classifier", "B-IF": "Anomaly"}
+ML_HELP = ("Two models score every drone once per 15 s window, live. "
+           "Classifier: a Random Forest's probability that the drone's telemetry "
+           "is compromised (alert at 0.5). Anomaly: an Isolation Forest fitted on "
+           "clean traffic only says whether the window looks unlike normal "
+           "operation.")
+SERIES_COLOR = {"Trust score": "#2563eb", "DQ score": "#94a3b8",
+                "Classifier P(compromised)": "#dc2626"}
 QUARANTINE_RULE = ("A record is quarantined -- removed from the trust path -- when "
                    "the mean of its five dimension scores falls below 0.5, or when "
                    "any trust metric is outside [0, 1]. Otherwise a failed rule "
@@ -106,6 +117,14 @@ div[data-testid="stMetricValue"] {font-size:clamp(1.15rem, 1.7vw, 1.75rem);}
              background:rgba(185,28,28,.06); border-radius:0 6px 6px 0; font-size:.92rem;}
 .uav-meta {opacity:.72; font-size:.85rem;}
 .uav-alert-title {font-size:1.05rem; font-weight:650;}
+.uav-tag {font-size:.72rem; font-weight:600; margin-left:.6rem; padding:.1rem .5rem;
+          border-radius:4px; background:rgba(128,128,128,.16); vertical-align:middle;}
+.uav-reason.watch {border-left-color:#0e7490; background:rgba(14,116,144,.07);}
+.uav-count {text-align:center; font-size:.8rem; opacity:.85; margin-bottom:.4rem;}
+.uav-count b {font-size:1.6rem; color:#b91c1c;}
+.uav-status {text-align:center; font-weight:650; padding:.5rem 0;}
+.uav-status span {font-weight:400; font-size:.8rem; opacity:.75;}
+.uav-status.iso {color:#7c3aed;}
 /* live mode refreshes every second; the toolbar's RUNNING/Stop badge would
    flash on every refresh, which reads as instability on a monitoring screen */
 div[data-testid="stStatusWidget"] {visibility:hidden;}
@@ -160,9 +179,16 @@ with st.sidebar:
                              format="%.2f",
                              help="Fraction of payload-carrying records that get "
                                   "the fault.")
+        have_model = MODEL_PATH.exists()
+        use_ml = st.toggle("Run ML models", value=have_model, disabled=not have_model,
+                           help="Score every drone's 15 s windows with the "
+                                "classifier and the anomaly detector, as "
+                                "detect.py --ml does live. Needs models/ml.joblib "
+                                "(python train_ml.py).")
         if st.button("Load session", type="primary", use_container_width=True):
             with st.spinner("Replaying session through the pipeline..."):
-                ss.state = build_offline(session, fault=fault, fault_rate=rate)
+                ss.state = build_offline(session, fault=fault, fault_rate=rate,
+                                         ml=use_ml)
             ss.feed = None
             ss.source = "Recorded session"
             ss.loaded = (session, fault, rate)
@@ -197,7 +223,12 @@ with st.sidebar:
             f"unanswered requests, while the drone is still completing its own\n"
             f"- Window: **{C.WINDOW_SECONDS} s**\n"
             f"- Kafka partitions: **{C.N_PARTITIONS}**, keyed by drone\n"
-            f"- Topics: `{C.TOPIC_TELEMETRY}`, `{C.TOPIC_VERDICT}`, `uav.operator`")
+            f"- ML: classifier + anomaly detector per drone per window "
+            f"(`detect.py --ml`)\n"
+            f"- Autonomous response: rule alerts isolated after a grace period "
+            f"(`respond.py`)\n"
+            f"- Topics: `{C.TOPIC_TELEMETRY}`, `{C.TOPIC_VERDICT}`, `uav.operator`, "
+            f"`uav.action`")
 
 def render() -> None:
     """Everything below the sidebar. In live mode this reruns on its own every
@@ -212,7 +243,6 @@ def render() -> None:
     live = ss.source == "Live stream (Kafka)" and ss.feed is not None
     summary = state.alert_summary()
     dqs = state.dq_summary()
-    alerts = [v for v in state.verdicts if v.verdict != "QUARANTINE"]
 
     # ---------------------------------------------------------------------
     # header
@@ -261,12 +291,12 @@ def render() -> None:
     k[1].metric("Drones", sum(1 for d in state.drones.values() if d.n_target),
                 help="Drones that have been asked for telemetry at least once.")
     k[2].metric("Alerts", summary["alerts"],
-                help="Drones the suppression rule flagged: it stopped answering "
-                     "others while still completing its own requests.")
-    k[3].metric("Actionable",
-                f"{summary['actionable_pct']:.0f}%" if summary["alerts"] else "—",
-                help="Share of alerts that state their evidence in words an operator "
-                     "can act on. The rule always does; a bare model score would not.")
+                help="Drones with an attack alert from the rule (stopped answering "
+                     "while still active) or the classifier. Every alert states its "
+                     "evidence in words.")
+    k[3].metric("Watch", summary["watch"],
+                help="Drones only the anomaly detector flagged: unusual, not "
+                     "necessarily compromised. Nothing is done automatically.")
     k[4].metric("DQ flagged", f"{dqs['flagged_pct']:.1f}%",
                 help="Share of records where at least one data quality rule failed. "
                      "Flagged records are kept but scored down.")
@@ -280,70 +310,126 @@ def render() -> None:
     # ---------------------------------------------------------------------
     # Overview
     # ---------------------------------------------------------------------
-    def _publish(v) -> None:
+    def _decide(inc, decision: str) -> None:
+        state.decide(inc.iid, decision)
         if ss.feed is not None:
-            err = ss.feed.publish_decision(v)
+            err = ss.feed.publish_decision(inc)
             ss.last_error = (f"Decision not delivered to uav.operator: {err}"
                              if err else None)
 
+    def _incident_card(inc) -> None:
+        alert = inc.severity == "alert"
+        css = "uav-reason" if alert else "uav-reason watch"
+        with st.container(border=True):
+            left, right = st.columns([5, 1.25])
+            with left:
+                kinds = " + ".join(SIGNAL_LABEL[t] for t in dict.fromkeys(inc.tracks))
+                head = "attack alert" if alert else "watch"
+                st.markdown(
+                    f'<div class="uav-alert-title">{html.escape(inc.drone)} — {head}'
+                    f'<span class="uav-tag">{html.escape(kinds)}</span></div>',
+                    unsafe_allow_html=True)
+                meta = [f"first signal at t = {inc.first_t} s"]
+                if inc.first_delay_s is not None:
+                    meta.append(f"{inc.first_delay_s} s after attack onset")
+                if inc.partition is not None:
+                    meta.append(f"Kafka partition {inc.partition}")
+                st.markdown(f'<div class="uav-meta">{html.escape(" · ".join(meta))}'
+                            f'</div>', unsafe_allow_html=True)
+                for v in inc.signals:
+                    st.markdown(
+                        f'<div class="{css}"><b>{html.escape(SIGNAL_LABEL[v.track])}'
+                        f'</b> · t = {v.t_session} s<br>{html.escape(v.reason)}</div>',
+                        unsafe_allow_html=True)
+            with right:
+                _incident_controls(inc)
+
+    def _incident_controls(inc) -> None:
+        k = inc.iid
+        if inc.action == "ISOLATE_PENDING" and inc.due_at:
+            left_s = max(0.0, inc.due_at - time.time())
+            st.markdown(f'<div class="uav-count">Isolating in<br>'
+                        f'<b>{left_s:.0f} s</b></div>', unsafe_allow_html=True)
+            if st.button("Isolate now", key=f"i{k}", type="primary",
+                         use_container_width=True,
+                         help="Act immediately instead of waiting."):
+                _decide(inc, "ACCEPT")
+                st.rerun()
+            if st.button("Hold", key=f"h{k}", use_container_width=True,
+                         help="Cancel the automatic isolation: the alert stays, "
+                              "nothing is done to the drone."):
+                _decide(inc, "REJECT")
+                st.rerun()
+            return
+        if inc.action == "ISOLATED":
+            by = "automatically" if inc.action_by == "auto" else "by operator"
+            took = (f"<br>{inc.seconds_to_action:.0f} s after the alert"
+                    if inc.seconds_to_action is not None else "")
+            st.markdown(f'<div class="uav-status iso">ISOLATED<br>'
+                        f'<span>{by}{took}</span></div>', unsafe_allow_html=True)
+            if st.button("Release", key=f"l{k}", use_container_width=True,
+                         help="Trust the drone again."):
+                _decide(inc, "RELEASE")
+                st.rerun()
+            return
+        if inc.action in ("CANCELLED", "RELEASED") or inc.decision == "REJECT":
+            word = {"RELEASED": "Released"}.get(inc.action, "Dismissed")
+            st.markdown(f'<div class="uav-status">{word}<br><span>by operator</span>'
+                        f'</div>', unsafe_allow_html=True)
+            return
+        if inc.action == "AWAITING_OPERATOR":
+            st.caption("Waiting for you: classifier alerts are never acted on "
+                       "automatically.")
+        if st.button("Isolate", key=f"i{k}", type="primary", use_container_width=True,
+                     help="Stop trusting this drone's telemetry. In live mode the "
+                          "decision goes to uav.operator and the action to uav.action."):
+            _decide(inc, "ACCEPT")
+            st.rerun()
+        if st.button("Dismiss", key=f"d{k}", use_container_width=True,
+                     help="Mark as a false alarm."):
+            _decide(inc, "REJECT")
+            st.rerun()
 
     with tab_over:
+        incidents = state.incident_list()
+        alerts_ = [i for i in incidents if i.severity == "alert"]
+        watches = [i for i in incidents if i.severity == "watch"]
         st.markdown("#### Alerts")
-        if not alerts and live:
+        if live:
+            st.caption("Autonomous mode: rule alerts are isolated automatically "
+                       "after a short grace period unless you hold them; classifier "
+                       "alerts wait for you. Requires respond.py to be running.")
+        if not alerts_ and live:
             st.success("No alerts yet. The rule raises one when a drone leaves "
                        f"{RL.DEFAULT_STREAK} requests in a row unanswered while still "
-                       "completing its own.")
-        elif not alerts:
-            st.success("No drone flagged. For every session except Critical Node this "
-                       "is the correct result: the rule targets suppression and stays "
-                       "silent otherwise.")
-        for v in reversed(alerts):
-            with st.container(border=True):
-                left, right = st.columns([5, 1.1])
-                with left:
-                    status = {"ACCEPT": " · accepted by operator",
-                              "REJECT": " · rejected by operator"}.get(v.decision, "")
-                    st.markdown(
-                        f'<div class="uav-alert-title">{html.escape(v.drone)} — '
-                        f'suppression{html.escape(status)}</div>',
-                        unsafe_allow_html=True)
-                    meta = [f"detected at t = {v.t_session} s"]
-                    if v.detection_delay_s is not None:
-                        meta.append(f"{v.detection_delay_s} s after attack onset")
-                    meta.append(f"track {v.track} (rule)")
-                    if v.partition is not None:
-                        meta.append(f"Kafka partition {v.partition}")
-                    st.markdown(f'<div class="uav-meta">{html.escape(" · ".join(meta))}'
-                                f'</div>', unsafe_allow_html=True)
-                    st.markdown(f'<div class="uav-reason">'
-                                f'{html.escape(v.reason or "no reason given")}</div>',
-                                unsafe_allow_html=True)
-                with right:
-                    if v.decision is None:
-                        if st.button("Accept", key=f"a{v.vid}", type="primary",
-                                     use_container_width=True,
-                                     help="Confirm the alert. In live mode the decision "
-                                          "is published to the uav.operator topic."):
-                            state.decide(v.vid, "ACCEPT")
-                            _publish(v)
-                            st.rerun()
-                        if st.button("Reject", key=f"r{v.vid}", use_container_width=True,
-                                     help="Dismiss the alert as a false positive."):
-                            state.decide(v.vid, "REJECT")
-                            _publish(v)
-                            st.rerun()
-                    else:
-                        st.caption(f"Decision: {v.decision.lower()}")
+                       "completing its own; the classifier when a drone's 15 s window "
+                       "looks compromised.")
+        elif not alerts_:
+            st.success("No drone flagged in this session.")
+        for inc in alerts_:
+            _incident_card(inc)
+        if watches:
+            with st.expander(f"Watch list · {len(watches)} drone"
+                             f"{'s' if len(watches) != 1 else ''} behaving unusually",
+                             expanded=False):
+                st.caption("Raised by the anomaly detector alone: these drones' "
+                           "traffic looked unlike clean operation for consecutive "
+                           "windows. That is often a side effect of an attack nearby "
+                           "-- not proof the drone is compromised -- so nothing is "
+                           "done automatically.")
+                for inc in watches:
+                    _incident_card(inc)
 
         st.markdown("#### Swarm")
         st.caption("Ranked by each drone's longest run of unanswered requests -- the "
-                   "evidence the suppression rule uses.")
+                   "evidence the suppression rule uses. The Classifier and Anomaly "
+                   "columns are the two ML models' latest reading for each drone.")
         rows = state.swarm_table()
         if rows:
             df = pd.DataFrame(rows)
             df["timeout_pct"] = (df["timeout_rate"] * 100).round(1)
             df = df[["drone", "band", "max_streak", "streak", "timeout_pct",
-                     "trust", "exchanges"]]
+                     "trust", "p_compromised", "anomaly", "exchanges"]]
             styled = df.style.map(
                 lambda b: f"color: {STATUS_COLOR.get(b, '#64748b')}; font-weight: 600",
                 subset=["band"])
@@ -370,6 +456,16 @@ def render() -> None:
                         help="Trust score (0 to 1, from the simulator's trust "
                              "model) of the drone's last answered exchange. "
                              + TRUST_NOTE),
+                    "p_compromised": st.column_config.ProgressColumn(
+                        "Classifier", min_value=0.0, max_value=1.0, format="%.2f",
+                        help="Random Forest: probability that this drone's telemetry "
+                             "in its latest 15 s window is compromised. Alert at "
+                             "0.5. Empty until the first window closes, or when ML "
+                             "is off."),
+                    "anomaly": st.column_config.TextColumn(
+                        "Anomaly", help="Isolation Forest, fitted on clean traffic "
+                                        "only: does the latest window look unlike "
+                                        "normal operation?"),
                     "exchanges": st.column_config.NumberColumn(
                         "Requests received", help="Times other drones asked this drone "
                                                   "for telemetry."),
@@ -475,15 +571,22 @@ def render() -> None:
                         help=f"Rule threshold is {RL.DEFAULT_STREAK}.")
             m[2].metric("Unanswered", f"{d.timeout_rate:.0%}",
                         help="Share of requests to this drone with no answer.")
-            m[3].metric("DQ flagged", d.dq_flagged,
+            m[3].metric("Classifier",
+                        f"{d.ml_p:.2f}" if d.ml_p is not None else "—",
+                        help="Latest P(compromised) from the Random Forest. "
+                             + ML_HELP)
+            m[4].metric("DQ flagged", d.dq_flagged,
                         help="This drone's records with at least one failed DQ rule.")
-            m[4].metric("Requests received", d.n_target)
 
             if d.trust:
                 df = pd.DataFrame({"t": list(d.times), "Trust score": list(d.trust)})
                 if d.dq and len(d.dq) == len(d.trust):
                     df["DQ score"] = list(d.dq)
                 long = df.melt("t", var_name="series", value_name="value")
+                if d.ml_hist:
+                    mlh = pd.DataFrame(list(d.ml_hist), columns=["t", "value"])
+                    mlh["series"] = "Classifier P(compromised)"
+                    long = pd.concat([long, mlh], ignore_index=True)
                 # Reports are sparse samples: the value holds until the next report,
                 # so draw steps with a dot on each real sample, not straight ramps
                 # that would invent a gradual change between two distant reports.
@@ -515,9 +618,11 @@ def render() -> None:
                 st.caption("Trust score from the simulator's trust model; DQ score is "
                            "the mean of the five data quality dimensions. Each dot is "
                            "one answered exchange, and the value holds until the next; "
-                           "timeouts carry no score and are not plotted. Hover a dot "
-                           "for its value. The attack onset is experiment "
-                           "metadata shown for reference -- the detector never reads it.")
+                           "timeouts carry no score and are not plotted. The red line "
+                           "is the classifier's P(compromised), one value per 15 s "
+                           "window. Hover a dot for its value. The attack onset is "
+                           "experiment metadata shown for reference -- no detector "
+                           "reads it.")
             else:
                 st.caption("No trust samples for this drone yet.")
 
@@ -534,8 +639,9 @@ def render() -> None:
     # ---------------------------------------------------------------------
     with tab_pipe:
         st.caption("Producer → Kafka (uav.telemetry, keyed by drone) → detector "
-                   "(data quality → suppression rule) → uav.verdict → this dashboard "
-                   "and the S3 archive. Every stage runs per message, as it arrives.")
+                   "(data quality → suppression rule → ML per 15 s window) → "
+                   "uav.verdict → responder (uav.action), this dashboard and the S3 "
+                   "archive. Every stage runs as the data arrives.")
         p = st.columns(4)
         r = state.rate() or 0.0
         p[0].metric("Throughput", f"{r:,.0f} msg/s" if live else "—",
@@ -550,11 +656,16 @@ def render() -> None:
         p[1].metric("Partitions active", len(state.partitions) if live else "—",
                     help="Kafka partitions this dashboard has received telemetry from. "
                          "Live mode only.")
-        p[2].metric("Alerts", summary["alerts"],
-                    help="Drones flagged by the suppression rule.")
-        p[3].metric("Operator decisions", summary["accepted"] + summary["rejected"],
-                    help="Accepted or rejected alerts. In live mode each decision is "
-                         "published to uav.operator.")
+        p[2].metric("ML windows scored", f"{state.ml_windows:,}",
+                    help="Drone windows scored by both ML models. " + ML_HELP)
+        n_auto = sum(1 for a in state.actions
+                     if a.get("action") == "ISOLATED" and a.get("by") == "auto")
+        p[3].metric("Decisions", summary["decided"],
+                    help="Incidents isolated or dismissed, by the responder or an "
+                         "operator. Operator decisions go to uav.operator; actions "
+                         "to uav.action.")
+        if n_auto:
+            p[3].caption(f"{n_auto} taken automatically.")
 
         left, right = st.columns([1.2, 1])
         with left:
@@ -619,11 +730,24 @@ def render() -> None:
     telemetry; every exchange flows through Kafka, is checked for data quality, and
     is evaluated for signs of attack, message by message.
 
-    **Attack alerts (Overview).** The suppression rule flags a drone that has left
-    **{RL.DEFAULT_STREAK} or more** requests in a row unanswered *while still
-    completing requests of its own*. A drone that is out of range can't do the
-    second part, so this separates refusing to answer from simply being too far
-    away. Each alert states its evidence; accept or reject it.
+    **Alerts (Overview).** Three independent detectors, grouped into one card
+    per drone:
+    - **Rule** -- flags a drone that has left **{RL.DEFAULT_STREAK} or more**
+      requests in a row unanswered *while still completing requests of its own*.
+      A drone out of range can't do the second part, so this separates refusing
+      to answer from being too far away.
+    - **Classifier** -- a Random Forest scores every drone's 15 s window; an
+      alert when P(compromised) reaches 0.5.
+    - **Anomaly** -- an Isolation Forest fitted on clean traffic only; a drone
+      unlike normal operation for consecutive windows goes on the *watch list*.
+
+    Every alert states its evidence in words.
+
+    **Autonomous response (live).** `respond.py` isolates a drone with a rule
+    alert automatically after a short countdown -- the rule had no false alarms
+    in any recorded session. During the countdown you can **Isolate now** or
+    **Hold**; afterwards **Release**. Classifier alerts wait for you; the watch
+    list is never acted on. Every action is published to `uav.action`.
 
     **Swarm (Overview).** Every drone, ranked by its longest unbroken run of
     unanswered requests. Honest drones miss requests too, but their silence ends;
@@ -636,8 +760,8 @@ def render() -> None:
     see it work, load a recorded session with a fault injected, or run the
     producer with `--fault`.
 
-    **Drone detail.** One drone's trust and data quality over time, with the attack
-    onset marked.
+    **Drone detail.** One drone's trust, data quality and classifier score over
+    time, with the attack onset marked.
 
     **Pipeline.** How many records reached each stage, and in live mode the read
     throughput and the spread across Kafka partitions.

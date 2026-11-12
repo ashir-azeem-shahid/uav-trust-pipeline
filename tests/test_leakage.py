@@ -141,3 +141,102 @@ def test_both_roles_land_on_one_partition():
 
     for drone, parts in seen.items():
         assert len(parts) == 1, f"{drone} spread across partitions {parts}"
+
+
+# ---------------------------------------------------------------------
+# Track B (live ML) and the responder
+# ---------------------------------------------------------------------
+def _poison(m: dict) -> dict:
+    p = dict(m)
+    p["_gt"] = {"attack_target": "POISON", "malicious": not m["_gt"]["malicious"],
+                "attack_type": "POISON", "trust_label_csv": "POISON"}
+    return p
+
+
+def test_ml_windows_never_read_ground_truth():
+    """
+    The ML features are built inside the live Pipeline. Poisoning '_gt' must
+    leave every window's features unchanged, as for the rule.
+    """
+    from detect import Pipeline
+
+    msgs = [m for _k, m, _o in R.replay_with_onset("CriticalNode")]
+    clean, poisoned = (Pipeline(collect_windows=True),
+                       Pipeline(collect_windows=True))
+    for m in msgs:
+        clean.handle(m)
+        poisoned.handle(_poison(m))
+    clean.finish()
+    poisoned.finish()
+    a = [(w.subject, w.start, w.features) for w in clean.windows]
+    b = [(w.subject, w.start, w.features) for w in poisoned.windows]
+    assert a and a == b, "ML window features changed when ground truth changed"
+
+
+def test_ml_feature_names_hold_no_ground_truth():
+    from detect import Pipeline
+
+    pipe = Pipeline(collect_windows=True)
+    for _k, m, _o in R.replay_with_onset("CriticalNode"):
+        pipe.handle(m)
+        if m["t_session"] > 40:
+            break
+    pipe.finish()
+    names = set(pipe.windows[0].features)
+    assert not names & C.FORBIDDEN_FEATURES
+    assert not any(n.startswith(("gt_", "_gt", "Trust_Label", "Attack")) for n in names)
+    assert len(names) == 47
+
+
+def test_ml_windows_same_with_or_without_partitions():
+    """
+    Per-partition clocks must not change the windows when messages arrive
+    in order -- the live path and the training path build the same data.
+    """
+    import zlib
+
+    from detect import Pipeline
+
+    def partition_of(key: str) -> int:          # any stable key hash will do
+        return zlib.crc32(key.encode()) % C.N_PARTITIONS
+
+    plain, parted = (Pipeline(collect_windows=True),
+                     Pipeline(collect_windows=True))
+    for key, m, _o in R.replay_with_onset("MITM"):
+        plain.handle(m)
+        parted.handle(m, partition_of(key))
+    plain.finish()
+    parted.finish()
+    a = sorted((w.subject, w.start, tuple(sorted(w.features.items())))
+               for w in plain.windows)
+    b = sorted((w.subject, w.start, tuple(sorted(w.features.items())))
+               for w in parted.windows)
+    assert a == b
+
+
+def test_responder_policy():
+    """Only the rule acts alone; an operator can always override."""
+    from respond import Responder
+
+    rule = {"drone": "D18", "verdict": "SUPPRESSION", "track": "A", "reason": "r"}
+    clf = {"drone": "D7", "verdict": "ML_COMPROMISED", "track": "B-RF", "reason": "c"}
+    anomaly = {"drone": "D3", "verdict": "ANOMALY", "track": "B-IF", "reason": "a"}
+
+    r = Responder(grace_s=10)
+    assert r.on_verdict(rule, 0)[0]["action"] == "ISOLATE_PENDING"
+    assert r.on_verdict(clf, 0)[0]["action"] == "AWAITING_OPERATOR"
+    assert r.on_verdict(anomaly, 0) == []
+    assert r.tick(9.9) == []
+    done = r.tick(10)
+    assert [(a["drone"], a["action"], a["by"]) for a in done] == [("D18", "ISOLATED", "auto")]
+    assert r.tick(100) == []                     # never isolates the classifier's drone
+
+    held = Responder(grace_s=10)
+    held.on_verdict(rule, 0)
+    assert held.on_operator({"drone": "D18", "decision": "REJECT"}, 3)[0]["action"] == "CANCELLED"
+    assert held.tick(100) == []                  # hold means hold
+
+    rel = Responder(grace_s=10)
+    rel.on_verdict(rule, 0)
+    rel.tick(10)
+    assert rel.on_operator({"drone": "D18", "decision": "RELEASE"}, 20)[0]["action"] == "RELEASED"
