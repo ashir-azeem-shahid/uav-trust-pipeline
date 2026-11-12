@@ -192,8 +192,15 @@ def run_kafka() -> None:
                                  key=v["drone"].encode(),
                                  value=json.dumps(v).encode())
                 producer.poll(0)
-                print(f"  VERDICT {v['drone']}  t={v['t_session']}s  "
-                      f"delay={v['detection_delay_s']}s  (partition {rec.partition()})")
+                if v["verdict"] == "QUARANTINE":
+                    # Data quality, not an attack: a record too broken to use.
+                    # (No detection delay -- there is no attack to time.)
+                    print(f"  QUARANTINE {v['drone']}  t={v['t_session']}s  "
+                          f"dq={v.get('dq_score')}  (partition {rec.partition()})")
+                else:
+                    print(f"  VERDICT {v['drone']}  t={v['t_session']}s  "
+                          f"delay={v.get('detection_delay_s')}s  "
+                          f"(partition {rec.partition()})")
                 print(f"          {v['reason']}")
     except KeyboardInterrupt:
         pass
@@ -202,6 +209,7 @@ def run_kafka() -> None:
         consumer.close()
         s = pipe.stats()
         print(f"\n  {s['messages']:,} messages, {s['verdicts']} verdicts, "
+              f"{s['quarantined']} quarantined, "
               f"p99 per-message {s['per_msg_ms_p99']:.3f}ms")
 
 

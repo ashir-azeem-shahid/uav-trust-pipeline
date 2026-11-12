@@ -17,6 +17,10 @@ Usage
 
   # real run at 10x wall-clock speed (1 simulated second = 0.1s)
   python produce.py CriticalNode --speed 10
+
+  # same, with 5% of records carrying a benign fault (see faults.py) --
+  # the live demo of the DQ layer working while detection carries on
+  python produce.py CriticalNode --speed 10 --fault trust_corrupt
 """
 
 from __future__ import annotations
@@ -27,6 +31,7 @@ import sys
 import time
 
 import config as C
+import faults as F
 import replay as R
 
 
@@ -58,20 +63,31 @@ def main() -> None:
     ap.add_argument("--speed", type=float, default=0.0,
                     help="replay speed multiplier; 0 = as fast as possible, "
                          "1 = real time, 10 = ten times real time")
+    ap.add_argument("--fault", choices=list(F.FAULTS), default=None,
+                    help="inject this benign fault into a share of records")
+    ap.add_argument("--fault-rate", type=float, default=0.05,
+                    help="share of payload-carrying records to corrupt")
+    ap.add_argument("--fault-seed", type=int, default=7)
     args = ap.parse_args()
 
     summary = R.summarise(args.attack)
     print(json.dumps(summary, indent=2), file=sys.stderr)
     print(f"\nproducing to {C.TOPIC_TELEMETRY} at {C.BOOTSTRAP}"
-          f"{'  [DRY RUN]' if args.dry_run else ''}\n", file=sys.stderr)
+          f"{'  [DRY RUN]' if args.dry_run else ''}"
+          + (f"  [fault: {args.fault} on {args.fault_rate:.0%} of records]"
+             if args.fault else "") + "\n", file=sys.stderr)
 
     producer = None if args.dry_run else make_producer()
 
     sent = 0
+    faulty = 0
     t0 = time.time()
     sim_start = None
 
-    for key, msg, _onset in R.replay_with_onset(args.attack):
+    stream = F.inject(R.replay_with_onset(args.attack),
+                      args.fault, args.fault_rate, args.fault_seed)
+    for key, msg, _onset, is_fault in stream:
+        faulty += is_fault
         # The partition key must be the drone the message is about. If this
         # ever drifts to requester/contacted, the suppression rule silently
         # stops firing -- so fail loudly instead.
@@ -107,7 +123,9 @@ def main() -> None:
 
     elapsed = time.time() - t0
     print(f"\nsent {sent:,} messages in {elapsed:.1f}s "
-          f"({sent / max(elapsed, 1e-9):,.0f} msg/s)", file=sys.stderr)
+          f"({sent / max(elapsed, 1e-9):,.0f} msg/s)"
+          + (f", {faulty:,} with fault {args.fault}" if args.fault else ""),
+          file=sys.stderr)
 
 
 if __name__ == "__main__":

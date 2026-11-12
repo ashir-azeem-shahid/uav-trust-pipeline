@@ -10,8 +10,11 @@ services:
     command:
       - redpanda
       - start
-      - --smp=1                      # 1 CPU core is plenty at our volumes
-      - --memory=1G
+      # Defaults suit a laptop or Codespace. For the scaling experiment on a
+      # bigger machine, raise them so the broker is never the bottleneck:
+      #   REDPANDA_SMP=2 REDPANDA_MEMORY=3G docker compose up -d
+      - --smp=${REDPANDA_SMP:-1}
+      - --memory=${REDPANDA_MEMORY:-1G}
       - --overprovisioned            # expect a shared machine
       - --node-id=0
       - --check=false
@@ -29,7 +32,9 @@ services:
       timeout: 5s
       retries: 10
 
-  # Creates the two topics with the right partition count, then exits.
+  # Creates the three topics with the right partition count, then exits.
+  # uav.operator carries the dashboard's accept/reject decisions; it must
+  # exist up front because the broker does not auto-create topics.
   # Without this, auto-created topics get 1 partition and the scaling
   # experiments have nothing to scale across.
   init-topics:
@@ -43,6 +48,7 @@ services:
       - |
         rpk topic create uav.telemetry -p 4 -r 1 --brokers redpanda:9092 || true
         rpk topic create uav.verdict   -p 4 -r 1 --brokers redpanda:9092 || true
+        rpk topic create uav.operator  -p 1 -r 1 --brokers redpanda:9092 || true
         rpk topic list --brokers redpanda:9092
     restart: "no"
 
