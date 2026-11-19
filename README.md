@@ -227,11 +227,29 @@ original-size test data at every size.
 
 | Data | Messages | Windows | Feature extraction | RF fit | Peak memory | RF AUC (unseen attack) |
 |---|---|---|---|---|---|---|
-| 1× | 83,906 | 3,146 | 5.5 s | 0.5 s | 172 MB | 0.93 |
-| 10× | 839,060 | 31,460 | 21 s | 1.1 s | 236 MB | 0.90 |
-| 30× | 2,517,180 | 94,380 | 54 s | 2.4 s | 396 MB | 0.90 |
+| 1× | 83,906 | 3,146 | 5.2 s | 0.5 s | 182 MB | 0.93 |
+| 3× | 251,718 | 9,438 | 9.4 s | 0.7 s | 199 MB | 0.93 |
+| 10× | 839,060 | 31,460 | 21 s | 1.3 s | 238 MB | 0.90 |
+| 30× | 2,517,180 | 94,380 | 54 s | 2.5 s | 397 MB | 0.90 |
 
 Cost grows at most linearly; accuracy is stable. Clones add no new
 information, so this shows the training path scales, not that more data
 improves the models. The Isolation Forest's fit time is nearly constant by
 design: each tree is built from a fixed 256-sample subsample.
+
+### Cost of the ML stage in the stream
+
+`python tools/scale_test.py swarm --offline --copies 1 8 32 [--ml]`, one
+consumer, development machine (2 CPUs):
+
+| Swarm | Rule + DQ (msg/s) | + ML (msg/s) |
+|---|---|---|
+| 54 drones | 58,000 | 8,500 |
+| 432 drones | 60,000 | 25,000 |
+| 1,728 drones | 61,000 | 32,000 |
+
+The ML stage scores every drone's window in one batch per 15 s boundary, so
+its cost per message falls as the swarm grows. The recorded swarm produces
+about 25 messages per second in real time, so even the smallest case runs
+with over 300× headroom. Suppression verdicts equal the number of victim
+clones in every run.

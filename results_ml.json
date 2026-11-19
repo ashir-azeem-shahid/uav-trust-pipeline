@@ -1,0 +1,503 @@
+{
+  "sklearn": "1.9.1",
+  "n_features": 47,
+  "features": [
+    "DT_RotorAvgSpeed_mean",
+    "DT_RotorAvgSpeed_std",
+    "DT_Speed_mps_mean",
+    "DT_Speed_mps_std",
+    "Trust_BA_max",
+    "Trust_BA_mean",
+    "Trust_BA_min",
+    "Trust_BA_std",
+    "Trust_BFM_max",
+    "Trust_BFM_mean",
+    "Trust_BFM_min",
+    "Trust_BFM_std",
+    "Trust_CDM_max",
+    "Trust_CDM_mean",
+    "Trust_CDM_min",
+    "Trust_CDM_std",
+    "Trust_CR_max",
+    "Trust_CR_mean",
+    "Trust_CR_min",
+    "Trust_CR_std",
+    "Trust_RI_max",
+    "Trust_RI_mean",
+    "Trust_RI_min",
+    "Trust_RI_std",
+    "Trust_SM_max",
+    "Trust_SM_mean",
+    "Trust_SM_min",
+    "Trust_SM_std",
+    "Trust_Score_max",
+    "Trust_Score_mean",
+    "Trust_Score_min",
+    "Trust_Score_std",
+    "alive_while_silent",
+    "dq_completeness",
+    "dq_consistency",
+    "dq_min_score",
+    "dq_quarantined",
+    "dq_timeliness",
+    "dq_uniqueness",
+    "dq_validity",
+    "initiated_ok_rate",
+    "max_streak",
+    "n_answered",
+    "n_initiated",
+    "n_requests",
+    "streak_end",
+    "unanswered_rate"
+  ],
+  "alpha": 0.01,
+  "persist": 2,
+  "rf_threshold": 0.5,
+  "seeds": 5,
+  "evaluation": {
+    "iforest": {
+      "held_out_window_fpr": {
+        "mean": 0.0,
+        "std": 0.0
+      },
+      "held_out_drone_alerts": 0,
+      "per_attack": {
+        "CriticalNode": {
+          "window": {
+            "auc": {
+              "mean": 0.9352,
+              "std": 0.012
+            },
+            "precision": {
+              "mean": 0.1435,
+              "std": 0.0156
+            },
+            "recall": {
+              "mean": 0.8,
+              "std": 0.0745
+            },
+            "f1": {
+              "mean": 0.2428,
+              "std": 0.0234
+            },
+            "flagged_rate": {
+              "mean": 0.1516,
+              "std": 0.0236
+            }
+          },
+          "drone": {
+            "attacked_drones": 1,
+            "attacked_alerted": 1,
+            "first_delay_s": 25,
+            "honest_drones_alerted_during_attack": 5,
+            "alerts_before_onset": 0,
+            "drones_total": 54
+          }
+        },
+        "MITM": {
+          "window": {
+            "auc": {
+              "mean": 0.9099,
+              "std": 0.003
+            },
+            "precision": {
+              "mean": 0.2635,
+              "std": 0.0319
+            },
+            "recall": {
+              "mean": 0.5053,
+              "std": 0.0288
+            },
+            "f1": {
+              "mean": 0.3456,
+              "std": 0.0316
+            },
+            "flagged_rate": {
+              "mean": 0.0891,
+              "std": 0.01
+            }
+          },
+          "drone": {
+            "attacked_drones": 1,
+            "attacked_alerted": 1,
+            "first_delay_s": 85,
+            "honest_drones_alerted_during_attack": 2,
+            "alerts_before_onset": 0,
+            "drones_total": 54
+          }
+        },
+        "DataManipulation": {
+          "window": {
+            "auc": {
+              "mean": 0.893,
+              "std": 0.0038
+            },
+            "precision": {
+              "mean": 0.1444,
+              "std": 0.0283
+            },
+            "recall": {
+              "mean": 0.8,
+              "std": 0.0
+            },
+            "f1": {
+              "mean": 0.2436,
+              "std": 0.0406
+            },
+            "flagged_rate": {
+              "mean": 0.1135,
+              "std": 0.0229
+            }
+          },
+          "drone": {
+            "attacked_drones": 1,
+            "attacked_alerted": 1,
+            "first_delay_s": 25,
+            "honest_drones_alerted_during_attack": 6,
+            "alerts_before_onset": 0,
+            "drones_total": 54
+          }
+        },
+        "DataManipulation2": {
+          "window": {
+            "auc": {
+              "mean": 0.9633,
+              "std": 0.0084
+            },
+            "precision": {
+              "mean": 0.3147,
+              "std": 0.0526
+            },
+            "recall": {
+              "mean": 1.0,
+              "std": 0.0
+            },
+            "f1": {
+              "mean": 0.4769,
+              "std": 0.0598
+            },
+            "flagged_rate": {
+              "mean": 0.1364,
+              "std": 0.0213
+            }
+          },
+          "drone": {
+            "attacked_drones": 1,
+            "attacked_alerted": 1,
+            "first_delay_s": 25,
+            "honest_drones_alerted_during_attack": 1,
+            "alerts_before_onset": 0,
+            "drones_total": 54
+          }
+        },
+        "Sybil": {
+          "window": {
+            "auc": {
+              "mean": 0.9994,
+              "std": 0.0007
+            },
+            "precision": {
+              "mean": 0.9494,
+              "std": 0.0068
+            },
+            "recall": {
+              "mean": 1.0,
+              "std": 0.0
+            },
+            "f1": {
+              "mean": 0.974,
+              "std": 0.0035
+            },
+            "flagged_rate": {
+              "mean": 0.4299,
+              "std": 0.003
+            }
+          },
+          "drone": {
+            "attacked_drones": 8,
+            "attacked_alerted": 8,
+            "first_delay_s": 25,
+            "honest_drones_alerted_during_attack": 0,
+            "alerts_before_onset": 0,
+            "drones_total": 62
+          }
+        }
+      }
+    },
+    "rf_leave_one_attack_out": {
+      "CriticalNode": {
+        "window": {
+          "auc": {
+            "mean": 0.9969,
+            "std": 0.0023
+          },
+          "precision": {
+            "mean": 1.0,
+            "std": 0.0
+          },
+          "recall": {
+            "mean": 0.1667,
+            "std": 0.0
+          },
+          "f1": {
+            "mean": 0.2857,
+            "std": 0.0
+          },
+          "flagged_rate": {
+            "mean": 0.0045,
+            "std": 0.0
+          }
+        },
+        "held_out_window_fpr": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "drone": {
+          "attacked_drones": 1,
+          "attacked_alerted": 1,
+          "first_delay_s": 190,
+          "honest_drones_alerted_during_attack": 0,
+          "alerts_before_onset": 0,
+          "drones_total": 54
+        }
+      },
+      "MITM": {
+        "window": {
+          "auc": {
+            "mean": 0.7875,
+            "std": 0.0227
+          },
+          "precision": {
+            "mean": 0.0,
+            "std": 0.0
+          },
+          "recall": {
+            "mean": 0.0,
+            "std": 0.0
+          },
+          "f1": {
+            "mean": 0.0,
+            "std": 0.0
+          },
+          "flagged_rate": {
+            "mean": 0.0,
+            "std": 0.0
+          }
+        },
+        "held_out_window_fpr": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "drone": {
+          "attacked_drones": 1,
+          "attacked_alerted": 0,
+          "first_delay_s": null,
+          "honest_drones_alerted_during_attack": 0,
+          "alerts_before_onset": 0,
+          "drones_total": 54
+        }
+      },
+      "DataManipulation": {
+        "window": {
+          "auc": {
+            "mean": 0.9164,
+            "std": 0.0081
+          },
+          "precision": {
+            "mean": 1.0,
+            "std": 0.0
+          },
+          "recall": {
+            "mean": 0.6,
+            "std": 0.0
+          },
+          "f1": {
+            "mean": 0.75,
+            "std": 0.0
+          },
+          "flagged_rate": {
+            "mean": 0.0119,
+            "std": 0.0
+          }
+        },
+        "held_out_window_fpr": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "drone": {
+          "attacked_drones": 1,
+          "attacked_alerted": 1,
+          "first_delay_s": 10,
+          "honest_drones_alerted_during_attack": 0,
+          "alerts_before_onset": 1,
+          "drones_total": 54
+        }
+      },
+      "DataManipulation2": {
+        "window": {
+          "auc": {
+            "mean": 1.0,
+            "std": 0.0
+          },
+          "precision": {
+            "mean": 0.7909,
+            "std": 0.0373
+          },
+          "recall": {
+            "mean": 1.0,
+            "std": 0.0
+          },
+          "f1": {
+            "mean": 0.8829,
+            "std": 0.0235
+          },
+          "flagged_rate": {
+            "mean": 0.0533,
+            "std": 0.0026
+          }
+        },
+        "held_out_window_fpr": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "drone": {
+          "attacked_drones": 1,
+          "attacked_alerted": 1,
+          "first_delay_s": 10,
+          "honest_drones_alerted_during_attack": 2,
+          "alerts_before_onset": 1,
+          "drones_total": 54
+        }
+      },
+      "Sybil": {
+        "window": {
+          "auc": {
+            "mean": 1.0,
+            "std": 0.0
+          },
+          "precision": {
+            "mean": 0.9917,
+            "std": 0.0
+          },
+          "recall": {
+            "mean": 1.0,
+            "std": 0.0
+          },
+          "f1": {
+            "mean": 0.9959,
+            "std": 0.0
+          },
+          "flagged_rate": {
+            "mean": 0.4116,
+            "std": 0.0
+          }
+        },
+        "held_out_window_fpr": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "drone": {
+          "attacked_drones": 8,
+          "attacked_alerted": 8,
+          "first_delay_s": 10,
+          "honest_drones_alerted_during_attack": 1,
+          "alerts_before_onset": 8,
+          "drones_total": 62
+        }
+      }
+    },
+    "rf_known_attack": {
+      "DataManipulation->DataManipulation2": {
+        "window": {
+          "auc": {
+            "mean": 0.9989,
+            "std": 0.0
+          },
+          "precision": {
+            "mean": 0.6356,
+            "std": 0.0383
+          },
+          "recall": {
+            "mean": 1.0,
+            "std": 0.0
+          },
+          "f1": {
+            "mean": 0.7767,
+            "std": 0.0284
+          },
+          "flagged_rate": {
+            "mean": 0.0664,
+            "std": 0.0039
+          }
+        },
+        "drone": {
+          "attacked_drones": 1,
+          "attacked_alerted": 1,
+          "first_delay_s": 10,
+          "honest_drones_alerted_during_attack": 6,
+          "alerts_before_onset": 3,
+          "drones_total": 54
+        }
+      }
+    }
+  },
+  "deployed": {
+    "trained_on": [
+      "MITM",
+      "DataManipulation",
+      "DataManipulation2",
+      "Sybil"
+    ],
+    "excluded": [
+      "CriticalNode"
+    ],
+    "sklearn": "1.9.1",
+    "n_train_windows": 1372,
+    "n_baseline_windows": 199,
+    "train_seconds_iforest": 0.319,
+    "train_seconds_rf": 0.576,
+    "score_ms_per_batch_of_54_windows": 30.22,
+    "rf_top_features": [
+      {
+        "feature": "max_streak",
+        "importance": 0.1512
+      },
+      {
+        "feature": "streak_end",
+        "importance": 0.1094
+      },
+      {
+        "feature": "alive_while_silent",
+        "importance": 0.0767
+      },
+      {
+        "feature": "initiated_ok_rate",
+        "importance": 0.0538
+      },
+      {
+        "feature": "n_initiated",
+        "importance": 0.041
+      },
+      {
+        "feature": "Trust_Score_mean",
+        "importance": 0.0397
+      },
+      {
+        "feature": "Trust_BA_max",
+        "importance": 0.0393
+      },
+      {
+        "feature": "n_requests",
+        "importance": 0.0367
+      },
+      {
+        "feature": "Trust_SM_min",
+        "importance": 0.0348
+      },
+      {
+        "feature": "Trust_CR_mean",
+        "importance": 0.0333
+      }
+    ]
+  }
+}
