@@ -1,0 +1,229 @@
+{
+  "experiment": "swarm",
+  "attack": "CriticalNode",
+  "consumers": 1,
+  "partitions": 4,
+  "runs": [
+    {
+      "consumers": 1,
+      "messages": 12886,
+      "verdicts": 1,
+      "wall_seconds": 0.2899,
+      "msg_per_s": 44457.1,
+      "workers": [
+        {
+          "worker": 0,
+          "partitions": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "messages": 12886,
+          "verdicts": 1,
+          "seconds": 0.2899,
+          "pipeline_ms_p50": 0.00461,
+          "pipeline_ms_p99": 0.03348,
+          "quarantined": 0
+        }
+      ],
+      "rep": 1,
+      "copies": 1,
+      "drones": 54,
+      "verdict_check": "ok"
+    },
+    {
+      "consumers": 1,
+      "messages": 12886,
+      "verdicts": 1,
+      "wall_seconds": 0.1794,
+      "msg_per_s": 71810.8,
+      "workers": [
+        {
+          "worker": 0,
+          "partitions": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "messages": 12886,
+          "verdicts": 1,
+          "seconds": 0.1794,
+          "pipeline_ms_p50": 0.00397,
+          "pipeline_ms_p99": 0.02229,
+          "quarantined": 0
+        }
+      ],
+      "rep": 2,
+      "copies": 1,
+      "drones": 54,
+      "verdict_check": "ok"
+    },
+    {
+      "consumers": 1,
+      "messages": 103088,
+      "verdicts": 8,
+      "wall_seconds": 1.6679,
+      "msg_per_s": 61805.7,
+      "workers": [
+        {
+          "worker": 0,
+          "partitions": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "messages": 103088,
+          "verdicts": 8,
+          "seconds": 1.6679,
+          "pipeline_ms_p50": 0.00395,
+          "pipeline_ms_p99": 0.02943,
+          "quarantined": 0
+        }
+      ],
+      "rep": 1,
+      "copies": 8,
+      "drones": 432,
+      "verdict_check": "ok"
+    },
+    {
+      "consumers": 1,
+      "messages": 103088,
+      "verdicts": 8,
+      "wall_seconds": 1.7649,
+      "msg_per_s": 58410.4,
+      "workers": [
+        {
+          "worker": 0,
+          "partitions": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "messages": 103088,
+          "verdicts": 8,
+          "seconds": 1.7649,
+          "pipeline_ms_p50": 0.0038,
+          "pipeline_ms_p99": 0.03227,
+          "quarantined": 0
+        }
+      ],
+      "rep": 2,
+      "copies": 8,
+      "drones": 432,
+      "verdict_check": "ok"
+    },
+    {
+      "consumers": 1,
+      "messages": 412352,
+      "verdicts": 32,
+      "wall_seconds": 7.1134,
+      "msg_per_s": 57968.4,
+      "workers": [
+        {
+          "worker": 0,
+          "partitions": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "messages": 412352,
+          "verdicts": 32,
+          "seconds": 7.1134,
+          "pipeline_ms_p50": 0.00403,
+          "pipeline_ms_p99": 0.03179,
+          "quarantined": 0
+        }
+      ],
+      "rep": 1,
+      "copies": 32,
+      "drones": 1728,
+      "verdict_check": "ok"
+    },
+    {
+      "consumers": 1,
+      "messages": 412352,
+      "verdicts": 32,
+      "wall_seconds": 6.419,
+      "msg_per_s": 64239.0,
+      "workers": [
+        {
+          "worker": 0,
+          "partitions": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "messages": 412352,
+          "verdicts": 32,
+          "seconds": 6.419,
+          "pipeline_ms_p50": 0.00386,
+          "pipeline_ms_p99": 0.02901,
+          "quarantined": 0
+        }
+      ],
+      "rep": 2,
+      "copies": 32,
+      "drones": 1728,
+      "verdict_check": "ok"
+    }
+  ],
+  "summary": [
+    {
+      "copies": 1,
+      "drones": 54,
+      "messages": 12886,
+      "msg_per_s": {
+        "mean": 58133.9,
+        "std": 19342.0,
+        "min": 44457.1,
+        "max": 71810.8,
+        "n": 2
+      },
+      "pipeline_ms_p99_mean": 0.02789
+    },
+    {
+      "copies": 8,
+      "drones": 432,
+      "messages": 103088,
+      "msg_per_s": {
+        "mean": 60108.1,
+        "std": 2400.8,
+        "min": 58410.4,
+        "max": 61805.7,
+        "n": 2
+      },
+      "pipeline_ms_p99_mean": 0.03085
+    },
+    {
+      "copies": 32,
+      "drones": 1728,
+      "messages": 412352,
+      "msg_per_s": {
+        "mean": 61103.7,
+        "std": 4434.0,
+        "min": 57968.4,
+        "max": 64239.0,
+        "n": 2
+      },
+      "pipeline_ms_p99_mean": 0.0304
+    }
+  ],
+  "environment": {
+    "mode": "offline (no broker)",
+    "cpus_usable": 2,
+    "machine": null,
+    "platform": "Linux-6.18.44-fc-v726-x86_64-with-glibc2.39",
+    "python": "3.13.18",
+    "started_utc": "2026-11-19T22:14:38Z",
+    "command": "tools/scale_test.py swarm --offline --copies 1 8 32 --reps 2",
+    "note": "partitions statically assigned (assign(), not subscribe()) so group-rebalance time is excluded; one warm-up run discarded per configuration",
+    "ml_stage": false
+  },
+  "total_seconds": 52.4
+}

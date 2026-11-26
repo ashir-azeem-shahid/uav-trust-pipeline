@@ -1,21 +1,20 @@
 """
 detect.py
 =========
-The consumer. Reads uav.telemetry, applies Track A, writes uav.verdict.
+The consumer. Reads uav.telemetry, runs every stage per message, writes
+uav.verdict.
 
-Right now it holds stage 3 only (the suppression rule). Stages 1, 2 and 4
-slot in at the marked points -- the structure is deliberately laid out so
-adding them does not move anything else.
-
-  stage 1  DQ validation       -> dq.py          (next)
-  stage 2  trust ingest         -> trust.py       (next)
-  stage 3  suppression rule     -> rules.py       DONE
-  stage 4  ML inference         -> model.pkl      (after train.py)
+  stage 1  data quality        -> dq.py      QUARANTINE verdicts
+  stage 3  suppression rule    -> rules.py   SUPPRESSION verdicts (Track A)
+  stage 4  machine learning    -> ml.py      ANOMALY and ML_COMPROMISED
+                                             verdicts (Track B), once per
+                                             drone per 15 s window
 
 Usage
 -----
-  python detect.py                      # consume from Kafka
-  python detect.py --offline Sybil      # replay straight through, no broker
+  python detect.py                      # consume from Kafka, rule + DQ
+  python detect.py --ml                 # ... plus both ML models
+  python detect.py --offline Sybil --ml # replay straight through, no broker
 """
 
 from __future__ import annotations
@@ -24,7 +23,6 @@ import argparse
 import json
 import sys
 import time
-from collections import defaultdict
 
 import config as C
 from dq import DQValidator
@@ -39,7 +37,14 @@ class Pipeline:
     assigned -- which is the point of keying by the drone under evaluation.
     """
 
-    def __init__(self, streak: int = None) -> None:
+    def __init__(self, streak: int = None, ml=None,
+                 collect_windows: bool = False) -> None:
+        """
+        ml: None/False = rule and DQ only. True = also score with the trained
+            models in models/ml.joblib (or pass a path).
+        collect_windows: keep every closed ML window (train_ml.py uses this
+            to build training data through this exact code path).
+        """
         self.suppression = SuppressionDetector(
             streak if streak is not None else __import__("rules").DEFAULT_STREAK)
         self.dq = DQValidator()
@@ -50,13 +55,22 @@ class Pipeline:
         self.last_dq = None          # most recent DQResult, for features.py
         self.already_flagged: set[str] = set()
         self.latencies: list[float] = []
+        # ---- Track B state ----
+        from ml import MODEL_PATH, MLScorer, SubjectWindower
+        self.windower = SubjectWindower() if (ml or collect_windows) else None
+        self.scorer = (MLScorer(MODEL_PATH if ml is True else ml) if ml else None)
+        self.windows: list | None = [] if collect_windows else None
+        self.ml_pending: list[dict] = []
 
-    def handle(self, msg: dict) -> dict | None:
+    def handle(self, msg: dict, partition: int | None = None) -> dict | None:
         """
         Process one message. Returns a verdict dict, or None if nothing to say.
 
         Reads only the operational fields. msg['_gt'] is ground truth and is
         never consulted here -- tests/test_leakage.py asserts that.
+
+        partition: the Kafka partition the message came from, if any. Only
+        the ML windows use it (they keep time per partition).
         """
         t_in = time.perf_counter()
         self.messages_seen += 1
@@ -71,6 +85,7 @@ class Pipeline:
             self.dq_scores.append(dq_res.score)
             if dq_res.quarantine:
                 self.quarantined += 1
+                self._ml(msg, dq_res, partition)
                 self.latencies.append((time.perf_counter() - t_in) * 1000)
                 return {
                     "drone": msg["contacted"],
@@ -87,8 +102,11 @@ class Pipeline:
         # ---- stage 3: suppression rule (Track A) ------------------
         fired, reason = self.suppression.handle(msg)
 
-        # ---- stage 4: ML inference (Track B) ----------------------
-        # ml_verdict = self.model.predict_one(features(msg, dq_scores, fired))
+        # ---- stage 4: ML (Track B) -------------------------------
+        # Adds this message to its drone's 15 s window. When the stream
+        # clock passes a window's end, the window is scored by both models;
+        # any resulting verdicts wait in ml_pending for drain_ml().
+        self._ml(msg, dq_res, partition)
 
         self.latencies.append((time.perf_counter() - t_in) * 1000)
 
@@ -107,6 +125,31 @@ class Pipeline:
                                      if msg.get("onset") is not None else None,
             }
         return None
+
+    def _ml(self, msg: dict, dq_res, partition=None) -> None:
+        if self.windower is None:
+            return
+        closed = self.windower.observe(
+            msg, dq_res, self.suppression.drones.get(msg["about"]), partition)
+        self._take(closed)
+
+    def _take(self, closed: list) -> None:
+        if not closed:
+            return
+        if self.windows is not None:
+            self.windows.extend(closed)
+        if self.scorer is not None:
+            self.ml_pending.extend(self.scorer.verdicts(closed))
+
+    def drain_ml(self) -> list[dict]:
+        """ML verdicts produced since the last call (Track B)."""
+        out, self.ml_pending = self.ml_pending, []
+        return out
+
+    def finish(self) -> None:
+        """End of stream: close and score the windows still open."""
+        if self.windower is not None:
+            self._take(self.windower.flush())
 
     def stats(self) -> dict:
         lat = sorted(self.latencies)
@@ -127,21 +170,35 @@ class Pipeline:
 # ---------------------------------------------------------------------
 # offline mode -- no broker, straight from the replay
 # ---------------------------------------------------------------------
-def run_offline(attack: str) -> None:
+def run_offline(attack: str, use_ml: bool = False) -> None:
     import replay as R
 
-    pipe = Pipeline()
-    victim = None
+    pipe = Pipeline(ml=use_ml)
+    victim = attack_type = None
+
+    def show(v):
+        if v["verdict"] in ("QUARANTINE", "SCORE"):
+            return
+        # Sybil's malicious identities are the fabricated Ghost drones
+        bad = ("ghost" in v["drone"].lower()
+               if (attack_type or "").lower() == "sybil" else v["drone"] == victim)
+        mark = "CORRECT" if bad else "FALSE POSITIVE"
+        print(f"  [{mark}] {v['verdict']:<14} {v['drone']} at t={v['t_session']}s  "
+              f"delay={v['detection_delay_s']}s")
+        print(f"           {v['reason']}")
 
     for _key, msg, _onset in R.replay_with_onset(attack):
         if msg["_gt"]["attack_target"]:
             victim = msg["_gt"]["attack_target"]
+            attack_type = msg["_gt"]["attack_type"]
         v = pipe.handle(msg)
         if v:
-            mark = "CORRECT" if v["drone"] == victim else "FALSE POSITIVE"
-            print(f"  [{mark}] {v['drone']} at t={v['t_session']}s  "
-                  f"delay={v['detection_delay_s']}s")
-            print(f"           {v['reason']}")
+            show(v)
+        for mv in pipe.drain_ml():
+            show(mv)
+    pipe.finish()
+    for mv in pipe.drain_ml():
+        show(mv)
 
     s = pipe.stats()
     print(f"\n  ground-truth victim : {victim}")
@@ -156,7 +213,7 @@ def run_offline(attack: str) -> None:
 # ---------------------------------------------------------------------
 # Kafka mode
 # ---------------------------------------------------------------------
-def run_kafka() -> None:
+def run_kafka(use_ml: bool = False) -> None:
     try:
         from confluent_kafka import Consumer, Producer
     except ImportError:
@@ -172,8 +229,27 @@ def run_kafka() -> None:
     producer = Producer({"bootstrap.servers": C.BOOTSTRAP})
     consumer.subscribe([C.TOPIC_TELEMETRY])
 
-    pipe = Pipeline()
-    print(f"consuming {C.TOPIC_TELEMETRY}, writing {C.TOPIC_VERDICT}. Ctrl-C to stop.")
+    pipe = Pipeline(ml=use_ml)
+    partition_of: dict[str, int] = {}     # drone -> its partition, for ML verdicts
+    print(f"consuming {C.TOPIC_TELEMETRY}, writing {C.TOPIC_VERDICT}"
+          f"{' (rule + DQ + ML)' if use_ml else ' (rule + DQ)'}. Ctrl-C to stop.")
+
+    def publish(v: dict) -> None:
+        producer.produce(C.TOPIC_VERDICT, key=v["drone"].encode(),
+                         value=json.dumps(v).encode())
+        producer.poll(0)
+        if v["verdict"] == "SCORE":
+            return                  # per-window ML reading: published, not printed
+        if v["verdict"] == "QUARANTINE":
+            # Data quality, not an attack: a record too broken to use.
+            # (No detection delay -- there is no attack to time.)
+            print(f"  QUARANTINE {v['drone']}  t={v['t_session']}s  "
+                  f"dq={v.get('dq_score')}  (partition {v['partition']})")
+        else:
+            print(f"  {v['verdict']} {v['drone']}  t={v['t_session']}s  "
+                  f"delay={v.get('detection_delay_s')}s  "
+                  f"(partition {v['partition']})")
+        print(f"          {v['reason']}")
 
     try:
         while True:
@@ -185,23 +261,24 @@ def run_kafka() -> None:
                 continue
 
             msg = json.loads(rec.value())
-            v = pipe.handle(msg)
+            partition_of[msg["about"]] = rec.partition()
+            v = pipe.handle(msg, rec.partition())
             if v:
                 v["partition"] = rec.partition()
-                producer.produce(C.TOPIC_VERDICT,
-                                 key=v["drone"].encode(),
-                                 value=json.dumps(v).encode())
-                producer.poll(0)
-                print(f"  VERDICT {v['drone']}  t={v['t_session']}s  "
-                      f"delay={v['detection_delay_s']}s  (partition {rec.partition()})")
-                print(f"          {v['reason']}")
+                publish(v)
+            for mv in pipe.drain_ml():
+                mv["partition"] = partition_of.get(mv["drone"])
+                publish(mv)
     except KeyboardInterrupt:
         pass
     finally:
         producer.flush(10)
         consumer.close()
         s = pipe.stats()
+        ml_txt = (f", {pipe.scorer.windows_scored:,} ML windows scored "
+                  f"({pipe.windower.late} late messages)" if pipe.scorer else "")
         print(f"\n  {s['messages']:,} messages, {s['verdicts']} verdicts, "
+              f"{s['quarantined']} quarantined{ml_txt}, "
               f"p99 per-message {s['per_msg_ms_p99']:.3f}ms")
 
 
@@ -209,9 +286,11 @@ if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("--offline", metavar="ATTACK", choices=list(C.ATTACK_SESSIONS),
                     help="replay this session directly instead of reading Kafka")
+    ap.add_argument("--ml", action="store_true",
+                    help="also run the Track B models (train_ml.py writes them)")
     args = ap.parse_args()
 
     if args.offline:
-        run_offline(args.offline)
+        run_offline(args.offline, args.ml)
     else:
-        run_kafka()
+        run_kafka(args.ml)

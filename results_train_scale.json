@@ -1,0 +1,151 @@
+{
+  "cpus": 2,
+  "machine": "x86_64",
+  "sklearn": "1.9.1",
+  "runs": [
+    {
+      "factor": 1,
+      "messages": 83906,
+      "windows": 3146,
+      "drones_in_swarm": 54,
+      "feature_extraction_s": 5.16,
+      "messages_per_s": 16247,
+      "iforest_train_windows": 199,
+      "iforest_fit_s": 0.272,
+      "rf_train_windows_mean": 1315,
+      "rf_fit_s_mean": 0.534,
+      "peak_memory_mb_features": 176,
+      "peak_memory_mb": 182,
+      "iforest_auc": {
+        "CriticalNode": 0.9493,
+        "MITM": 0.9097,
+        "DataManipulation": 0.8899,
+        "DataManipulation2": 0.9729,
+        "Sybil": 0.9997
+      },
+      "iforest_heldout_fpr": 0.0,
+      "rf_loao_auc": {
+        "CriticalNode": 0.9992,
+        "MITM": 0.7525,
+        "DataManipulation": 0.9134,
+        "DataManipulation2": 1.0,
+        "Sybil": 1.0
+      },
+      "rf_loao_f1": {
+        "CriticalNode": 0.2857,
+        "MITM": 0.0,
+        "DataManipulation": 0.75,
+        "DataManipulation2": 0.9,
+        "Sybil": 0.9959
+      }
+    },
+    {
+      "factor": 3,
+      "messages": 251718,
+      "windows": 9438,
+      "drones_in_swarm": 162,
+      "feature_extraction_s": 9.41,
+      "messages_per_s": 26741,
+      "iforest_train_windows": 597,
+      "iforest_fit_s": 0.322,
+      "rf_train_windows_mean": 3947,
+      "rf_fit_s_mean": 0.7,
+      "peak_memory_mb_features": 191,
+      "peak_memory_mb": 199,
+      "iforest_auc": {
+        "CriticalNode": 0.9601,
+        "MITM": 0.9061,
+        "DataManipulation": 0.8931,
+        "DataManipulation2": 0.9772,
+        "Sybil": 0.9991
+      },
+      "iforest_heldout_fpr": 0.0,
+      "rf_loao_auc": {
+        "CriticalNode": 0.9977,
+        "MITM": 0.7388,
+        "DataManipulation": 0.8915,
+        "DataManipulation2": 0.9951,
+        "Sybil": 1.0
+      },
+      "rf_loao_f1": {
+        "CriticalNode": 0.2857,
+        "MITM": 0.0,
+        "DataManipulation": 0.75,
+        "DataManipulation2": 0.9474,
+        "Sybil": 1.0
+      }
+    },
+    {
+      "factor": 10,
+      "messages": 839060,
+      "windows": 31460,
+      "drones_in_swarm": 540,
+      "feature_extraction_s": 21.44,
+      "messages_per_s": 39138,
+      "iforest_train_windows": 1990,
+      "iforest_fit_s": 0.281,
+      "rf_train_windows_mean": 13158,
+      "rf_fit_s_mean": 1.246,
+      "peak_memory_mb_features": 238,
+      "peak_memory_mb": 238,
+      "iforest_auc": {
+        "CriticalNode": 0.9508,
+        "MITM": 0.9085,
+        "DataManipulation": 0.8858,
+        "DataManipulation2": 0.9756,
+        "Sybil": 0.9997
+      },
+      "iforest_heldout_fpr": 0.0,
+      "rf_loao_auc": {
+        "CriticalNode": 0.9996,
+        "MITM": 0.7679,
+        "DataManipulation": 0.749,
+        "DataManipulation2": 0.9951,
+        "Sybil": 1.0
+      },
+      "rf_loao_f1": {
+        "CriticalNode": 0.2857,
+        "MITM": 0.0,
+        "DataManipulation": 0.75,
+        "DataManipulation2": 0.9474,
+        "Sybil": 1.0
+      }
+    },
+    {
+      "factor": 30,
+      "messages": 2517180,
+      "windows": 94380,
+      "drones_in_swarm": 1620,
+      "feature_extraction_s": 53.48,
+      "messages_per_s": 47064,
+      "iforest_train_windows": 5970,
+      "iforest_fit_s": 0.342,
+      "rf_train_windows_mean": 39474,
+      "rf_fit_s_mean": 2.542,
+      "peak_memory_mb_features": 397,
+      "peak_memory_mb": 397,
+      "iforest_auc": {
+        "CriticalNode": 0.9631,
+        "MITM": 0.9117,
+        "DataManipulation": 0.8939,
+        "DataManipulation2": 0.9556,
+        "Sybil": 0.9999
+      },
+      "iforest_heldout_fpr": 0.0,
+      "rf_loao_auc": {
+        "CriticalNode": 1.0,
+        "MITM": 0.7669,
+        "DataManipulation": 0.753,
+        "DataManipulation2": 0.9951,
+        "Sybil": 1.0
+      },
+      "rf_loao_f1": {
+        "CriticalNode": 0.2857,
+        "MITM": 0.0,
+        "DataManipulation": 0.75,
+        "DataManipulation2": 0.9474,
+        "Sybil": 1.0
+      }
+    }
+  ]
+}

@@ -13,8 +13,8 @@ Modes
 -----
   python evaluate.py                 offline: throughput, per-stage latency,
                                      detection delay. No broker needed.
-  python evaluate.py --kafka         true end-to-end ingest -> verdict latency,
-                                     measured through a running broker.
+  End-to-end latency through Kafka is measured by
+  tools/scale_test.py latency (producer and consumer running concurrently).
 
 WHY PERCENTILES AND NOT AVERAGES
 --------------------------------
@@ -147,68 +147,11 @@ def throughput(attack: str, drone_counts=(5, 10, 25, 50)) -> list[dict]:
     return rows
 
 
-# ---------------------------------------------------------------------
-# end-to-end latency through a real broker
-# ---------------------------------------------------------------------
-def kafka_end_to_end(attack: str, limit: int = 20000) -> dict:
-    """
-    Produces with a wall-clock stamp, consumes, and measures the gap.
-    This is the number the brief calls "ingest to verdict".
-    """
-    import json as _json
-    from confluent_kafka import Consumer, Producer
-
-    producer = Producer({"bootstrap.servers": C.BOOTSTRAP,
-                         "linger.ms": 5, "compression.type": "lz4"})
-    consumer = Consumer({"bootstrap.servers": C.BOOTSTRAP,
-                         "group.id": f"eval-{int(time.time())}",
-                         "auto.offset.reset": "latest",
-                         "enable.auto.commit": True})
-    consumer.subscribe([C.TOPIC_TELEMETRY])
-    consumer.poll(2.0)          # force assignment before producing
-
-    sent = 0
-    for key, msg, _o in R.replay_with_onset(attack):
-        msg["t_produced"] = time.time()
-        producer.produce(C.TOPIC_TELEMETRY, key=key.encode(),
-                         value=_json.dumps(msg).encode())
-        sent += 1
-        if sent % 2000 == 0:
-            producer.poll(0)
-        if sent >= limit:
-            break
-    producer.flush(30)
-
-    pipe = Pipeline()
-    lat = []
-    deadline = time.time() + 60
-    got = 0
-    while got < sent and time.time() < deadline:
-        rec = consumer.poll(1.0)
-        if rec is None:
-            break
-        if rec.error():
-            continue
-        m = _json.loads(rec.value())
-        pipe.handle(m)
-        if "t_produced" in m:
-            lat.append((time.time() - m["t_produced"]) * 1000)
-        got += 1
-    consumer.close()
-
-    v = sorted(lat)
-    return {
-        "attack": attack, "produced": sent, "consumed": got,
-        "end_to_end_ms": {"p50": _pct(v, .50), "p95": _pct(v, .95),
-                          "p99": _pct(v, .99),
-                          "max": v[-1] if v else float("nan")},
-    }
-
-
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--kafka", action="store_true",
-                    help="also measure true end-to-end latency (needs broker)")
+                    help="(retired) end-to-end latency now lives in "
+                         "tools/scale_test.py latency")
     ap.add_argument("--out", default="results_performance.json")
     args = ap.parse_args()
 
@@ -251,7 +194,8 @@ def main() -> None:
                   f"{s[stage]['max']:>9.4f}")
 
     print("\n" + "=" * 78)
-    print("  TABLE 3 -- THROUGHPUT vs SWARM SIZE")
+    print("  TABLE 3 -- THROUGHPUT vs SWARM SIZE (pipeline compute only, no broker)")
+    print("  For throughput through Kafka see tools/scale_test.py consumers / swarm.")
     print("=" * 78)
     print(f"  {'attack':<20} {'drones':>7} {'messages':>9} {'msg/s':>12} {'us/msg':>9}")
     results["throughput"] = {}
@@ -263,21 +207,15 @@ def main() -> None:
                   f"{r['msg_per_s']:>12,.0f} {r['us_per_msg']:>9.2f}")
 
     if args.kafka:
-        print("\n" + "=" * 78)
-        print("  END-TO-END LATENCY THROUGH KAFKA (ms)")
-        print("=" * 78)
-        results["kafka"] = []
-        for name in list(C.ATTACK_SESSIONS)[:1]:
-            try:
-                k = kafka_end_to_end(name)
-                results["kafka"].append(k)
-                e = k["end_to_end_ms"]
-                print(f"  {name}: produced {k['produced']:,}, consumed {k['consumed']:,}")
-                print(f"    p50 {e['p50']:.2f}  p95 {e['p95']:.2f}  "
-                      f"p99 {e['p99']:.2f}  max {e['max']:.2f}")
-            except Exception as exc:                       # noqa: BLE001
-                print(f"  could not reach the broker: {exc}")
-                print("  start it with: docker compose up -d")
+        # An earlier version measured end-to-end latency here by producing the
+        # whole session first and only then consuming it. Every message then
+        # waited for the rest to be produced, so the figure (~0.8 s) timed the
+        # producer loop, not the pipeline. It was removed rather than kept
+        # misleading. The correct measurement runs producer and consumer at the
+        # same time at a paced rate: tools/scale_test.py latency.
+        print("\n  End-to-end latency through Kafka: run")
+        print("    python tools/scale_test.py latency")
+        print("  (producer and consumer concurrent, paced load, per-message timing)")
 
     with open(args.out, "w") as fh:
         json.dump(results, fh, indent=2, default=float)

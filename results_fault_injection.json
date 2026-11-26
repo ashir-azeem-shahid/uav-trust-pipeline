@@ -1,0 +1,183 @@
+{
+  "attack": "CriticalNode",
+  "rate": 0.05,
+  "seed": 7,
+  "expected_verdicts": [
+    {
+      "drone": "Drone18",
+      "t": 294
+    }
+  ],
+  "runs": [
+    {
+      "fault": "none",
+      "rate": 0.0,
+      "seed": 7,
+      "injected": 0,
+      "flagged": 0,
+      "flagged_pct": null,
+      "quarantined": 0,
+      "quarantined_pct": null,
+      "dimension_hits": {},
+      "clean_records": 3734,
+      "clean_flagged_pct": 3.51,
+      "malicious_verdicts": [
+        {
+          "drone": "Drone18",
+          "t": 294,
+          "delay_s": 19
+        }
+      ],
+      "verdicts_unchanged": true
+    },
+    {
+      "fault": "sensor_noise",
+      "rate": 0.05,
+      "seed": 7,
+      "injected": 194,
+      "flagged": 8,
+      "flagged_pct": 4.12,
+      "quarantined": 0,
+      "quarantined_pct": 0.0,
+      "dimension_hits": {
+        "consistency": 4,
+        "timeliness": 5
+      },
+      "clean_records": 3540,
+      "clean_flagged_pct": 3.45,
+      "malicious_verdicts": [
+        {
+          "drone": "Drone18",
+          "t": 294,
+          "delay_s": 19
+        }
+      ],
+      "verdicts_unchanged": true
+    },
+    {
+      "fault": "out_of_range",
+      "rate": 0.05,
+      "seed": 7,
+      "injected": 199,
+      "flagged": 199,
+      "flagged_pct": 100.0,
+      "quarantined": 0,
+      "quarantined_pct": 0.0,
+      "dimension_hits": {
+        "validity": 199,
+        "consistency": 21,
+        "timeliness": 3,
+        "uniqueness": 1
+      },
+      "clean_records": 3535,
+      "clean_flagged_pct": 3.62,
+      "malicious_verdicts": [
+        {
+          "drone": "Drone18",
+          "t": 294,
+          "delay_s": 19
+        }
+      ],
+      "verdicts_unchanged": true
+    },
+    {
+      "fault": "trust_corrupt",
+      "rate": 0.05,
+      "seed": 7,
+      "injected": 195,
+      "flagged": 195,
+      "flagged_pct": 100.0,
+      "quarantined": 195,
+      "quarantined_pct": 100.0,
+      "dimension_hits": {
+        "validity": 195,
+        "consistency": 3,
+        "timeliness": 3,
+        "uniqueness": 2
+      },
+      "clean_records": 3539,
+      "clean_flagged_pct": 3.5,
+      "malicious_verdicts": [
+        {
+          "drone": "Drone18",
+          "t": 294,
+          "delay_s": 19
+        }
+      ],
+      "verdicts_unchanged": true
+    },
+    {
+      "fault": "dropout",
+      "rate": 0.05,
+      "seed": 7,
+      "injected": 205,
+      "flagged": 205,
+      "flagged_pct": 100.0,
+      "quarantined": 0,
+      "quarantined_pct": 0.0,
+      "dimension_hits": {
+        "completeness": 205,
+        "timeliness": 4
+      },
+      "clean_records": 3529,
+      "clean_flagged_pct": 3.66,
+      "malicious_verdicts": [
+        {
+          "drone": "Drone18",
+          "t": 294,
+          "delay_s": 19
+        }
+      ],
+      "verdicts_unchanged": true
+    },
+    {
+      "fault": "duplicate",
+      "rate": 0.05,
+      "seed": 7,
+      "injected": 197,
+      "flagged": 197,
+      "flagged_pct": 100.0,
+      "quarantined": 0,
+      "quarantined_pct": 0.0,
+      "dimension_hits": {
+        "uniqueness": 197
+      },
+      "clean_records": 3734,
+      "clean_flagged_pct": 3.51,
+      "malicious_verdicts": [
+        {
+          "drone": "Drone18",
+          "t": 294,
+          "delay_s": 19
+        }
+      ],
+      "verdicts_unchanged": true
+    },
+    {
+      "fault": "position_jump",
+      "rate": 0.05,
+      "seed": 7,
+      "injected": 197,
+      "flagged": 59,
+      "flagged_pct": 29.95,
+      "quarantined": 0,
+      "quarantined_pct": 0.0,
+      "dimension_hits": {
+        "consistency": 56,
+        "timeliness": 3
+      },
+      "clean_records": 3537,
+      "clean_flagged_pct": 5.03,
+      "malicious_verdicts": [
+        {
+          "drone": "Drone18",
+          "t": 294,
+          "delay_s": 19
+        }
+      ],
+      "consistency_checkable": 62,
+      "consistency_caught_of_checkable": 56,
+      "verdicts_unchanged": true
+    }
+  ]
+}

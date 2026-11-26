@@ -133,7 +133,8 @@ class _Window:
         return f
 
 
-def build_windows(attack: str, window_mode: str = "15s") -> list[dict]:
+def build_windows(attack: str, window_mode: str = "15s",
+                  baseline=None) -> list[dict]:
     """
     Replay one session; return its labelled windows.
 
@@ -168,6 +169,10 @@ def build_windows(attack: str, window_mode: str = "15s") -> list[dict]:
 
     Report both modes. "session" makes the comparison to his table honest;
     "15s" is the task this thesis actually solves.
+
+    baseline: which clean recording to replay before the attack session.
+    Defaults to C.BASELINE. tools/anomaly.py passes C.BASELINE_HELD_OUT to
+    measure false alarms on clean traffic no model was fitted on.
     """
     if window_mode not in ("15s", "session"):
         raise ValueError(f"window_mode must be '15s' or 'session', got {window_mode!r}")
@@ -181,7 +186,7 @@ def build_windows(attack: str, window_mode: str = "15s") -> list[dict]:
     # per-peer tallies inside the current bucket, for the added features
     peer_seen: dict[tuple[str, int], dict[str, list[int]]] = {}
 
-    for _key, msg, ons in R.replay_with_onset(attack):
+    for _key, msg, ons in R.replay_with_onset(attack, baseline):
         onset = ons
         if msg["_gt"]["attack_target"]:
             victim = msg["_gt"]["attack_target"]
@@ -250,7 +255,12 @@ def build_windows(attack: str, window_mode: str = "15s") -> list[dict]:
             "group": requester,             # Fecak groups by Requester
             "session": attack,
             "window_start": bucket * WINDOW,
-            "post_onset": onset is not None and bucket * WINDOW >= onset,
+            # session mode: bucket is the phase (0 = baseline, 1 = attack)
+            "post_onset": (bucket == 1) if window_mode == "session"
+                          else (onset is not None and bucket * WINDOW >= onset),
+            "window_end": (None if window_mode == "session"
+                           else (bucket + 1) * WINDOW),
+            "onset": onset,
         })
     return out
 
