@@ -1,7 +1,7 @@
 {
   "model": "IsolationForest(n_estimators=300)",
   "trained_on": "clean baseline windows only (no attack, no labels)",
-  "sklearn": "1.9.1",
+  "sklearn": "1.5.2",
   "modes": [
     {
       "mode": "15s",
@@ -272,6 +272,281 @@
               "flagged_rate": {
                 "mean": 0.2529,
                 "std": 0.0038
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "mode": "session",
+      "alpha": 0.05,
+      "seeds": 5,
+      "n_train": 54,
+      "n_heldout": 54,
+      "variants": {
+        "full": {
+          "n_features": 45,
+          "fpr_train": {
+            "mean": 0.0556,
+            "std": 0.0
+          },
+          "fpr_heldout": {
+            "mean": 1.0,
+            "std": 0.0
+          },
+          "per_attack": {
+            "CriticalNode": {
+              "n_windows": 53,
+              "n_attacked": 25,
+              "auc": {
+                "mean": 0.7394,
+                "std": 0.0158
+              },
+              "precision": {
+                "mean": 0.6231,
+                "std": 0.0708
+              },
+              "recall": {
+                "mean": 0.6,
+                "std": 0.2449
+              },
+              "f1": {
+                "mean": 0.5955,
+                "std": 0.1803
+              },
+              "flagged_rate": {
+                "mean": 0.4415,
+                "std": 0.1576
+              }
+            },
+            "MITM": {
+              "n_windows": 53,
+              "n_attacked": 34,
+              "auc": {
+                "mean": 0.4285,
+                "std": 0.0104
+              },
+              "precision": {
+                "mean": 0.623,
+                "std": 0.0347
+              },
+              "recall": {
+                "mean": 0.1765,
+                "std": 0.0465
+              },
+              "f1": {
+                "mean": 0.2728,
+                "std": 0.0577
+              },
+              "flagged_rate": {
+                "mean": 0.1811,
+                "std": 0.0454
+              }
+            },
+            "DataManipulation": {
+              "n_windows": 53,
+              "n_attacked": 30,
+              "auc": {
+                "mean": 0.5762,
+                "std": 0.0094
+              },
+              "precision": {
+                "mean": 0.635,
+                "std": 0.0272
+              },
+              "recall": {
+                "mean": 0.46,
+                "std": 0.1657
+              },
+              "f1": {
+                "mean": 0.5204,
+                "std": 0.1286
+              },
+              "flagged_rate": {
+                "mean": 0.4075,
+                "std": 0.1377
+              }
+            },
+            "DataManipulation2": {
+              "n_windows": 53,
+              "n_attacked": 28,
+              "auc": {
+                "mean": 0.8177,
+                "std": 0.0158
+              },
+              "precision": {
+                "mean": 0.7897,
+                "std": 0.0319
+              },
+              "recall": {
+                "mean": 0.5786,
+                "std": 0.1195
+              },
+              "f1": {
+                "mean": 0.6608,
+                "std": 0.081
+              },
+              "flagged_rate": {
+                "mean": 0.3887,
+                "std": 0.0891
+              }
+            },
+            "Sybil": {
+              "n_windows": 54,
+              "n_attacked": 52,
+              "auc": {
+                "mean": 0.4788,
+                "std": 0.0432
+              },
+              "precision": {
+                "mean": 0.968,
+                "std": 0.0089
+              },
+              "recall": {
+                "mean": 0.6115,
+                "std": 0.1369
+              },
+              "f1": {
+                "mean": 0.7423,
+                "std": 0.1145
+              },
+              "flagged_rate": {
+                "mean": 0.6074,
+                "std": 0.1319
+              }
+            }
+          }
+        },
+        "trust_only": {
+          "n_features": 37,
+          "fpr_train": {
+            "mean": 0.0556,
+            "std": 0.0
+          },
+          "fpr_heldout": {
+            "mean": 1.0,
+            "std": 0.0
+          },
+          "per_attack": {
+            "CriticalNode": {
+              "n_windows": 53,
+              "n_attacked": 25,
+              "auc": {
+                "mean": 0.6557,
+                "std": 0.0195
+              },
+              "precision": {
+                "mean": 0.281,
+                "std": 0.0343
+              },
+              "recall": {
+                "mean": 0.08,
+                "std": 0.0
+              },
+              "f1": {
+                "mean": 0.1243,
+                "std": 0.0033
+              },
+              "flagged_rate": {
+                "mean": 0.1358,
+                "std": 0.0158
+              }
+            },
+            "MITM": {
+              "n_windows": 53,
+              "n_attacked": 34,
+              "auc": {
+                "mean": 0.4279,
+                "std": 0.0139
+              },
+              "precision": {
+                "mean": 0.5,
+                "std": 0.0
+              },
+              "recall": {
+                "mean": 0.0588,
+                "std": 0.0
+              },
+              "f1": {
+                "mean": 0.1053,
+                "std": 0.0
+              },
+              "flagged_rate": {
+                "mean": 0.0755,
+                "std": 0.0
+              }
+            },
+            "DataManipulation": {
+              "n_windows": 53,
+              "n_attacked": 30,
+              "auc": {
+                "mean": 0.5887,
+                "std": 0.0031
+              },
+              "precision": {
+                "mean": 0.6774,
+                "std": 0.0377
+              },
+              "recall": {
+                "mean": 0.18,
+                "std": 0.0183
+              },
+              "f1": {
+                "mean": 0.2838,
+                "std": 0.022
+              },
+              "flagged_rate": {
+                "mean": 0.1509,
+                "std": 0.0189
+              }
+            },
+            "DataManipulation2": {
+              "n_windows": 53,
+              "n_attacked": 28,
+              "auc": {
+                "mean": 0.7894,
+                "std": 0.007
+              },
+              "precision": {
+                "mean": 0.7242,
+                "std": 0.0341
+              },
+              "recall": {
+                "mean": 0.2857,
+                "std": 0.0437
+              },
+              "f1": {
+                "mean": 0.409,
+                "std": 0.0513
+              },
+              "flagged_rate": {
+                "mean": 0.2075,
+                "std": 0.0231
+              }
+            },
+            "Sybil": {
+              "n_windows": 54,
+              "n_attacked": 52,
+              "auc": {
+                "mean": 0.4327,
+                "std": 0.0435
+              },
+              "precision": {
+                "mean": 0.9407,
+                "std": 0.0093
+              },
+              "recall": {
+                "mean": 0.3115,
+                "std": 0.0498
+              },
+              "f1": {
+                "mean": 0.4665,
+                "std": 0.0579
+              },
+              "flagged_rate": {
+                "mean": 0.3185,
+                "std": 0.0479
               }
             }
           }

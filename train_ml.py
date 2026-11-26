@@ -145,13 +145,17 @@ def drone_level(ws, bundle, which: str) -> dict:
     hit = [a for a in alerts if a["drone"] in attacked and a["t_session"] > onset]
     false_post = [a for a in alerts if a["drone"] not in attacked
                   and a["window_start"] >= onset]
-    false_pre = [a for a in alerts if a["window_start"] < onset]
+    # an alert from a window that ENDS by the onset saw only clean traffic:
+    # a genuine false alarm. The window straddling the onset is counted apart.
+    false_pre = [a for a in alerts if a["t_session"] <= onset]
+    straddle = [a for a in alerts if a["window_start"] < onset < a["t_session"]]
     return {
         "attacked_drones": len(attacked),
         "attacked_alerted": len({a["drone"] for a in hit}),
         "first_delay_s": min((a["detection_delay_s"] for a in hit), default=None),
         "honest_drones_alerted_during_attack": len(false_post),
         "alerts_before_onset": len(false_pre),
+        "alerts_from_onset_window": len(straddle),
         "drones_total": len(labels),
     }
 

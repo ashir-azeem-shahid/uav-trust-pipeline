@@ -1,0 +1,86 @@
+{
+  "experiment": "latency",
+  "attack": "CriticalNode",
+  "consumers": 1,
+  "partitions": 4,
+  "seconds_per_rate": 10,
+  "warmup_seconds": 1,
+  "client_settings": {
+    "producer_linger_ms": 1,
+    "consumer": "poll() per message",
+    "consumer_fetch_wait_max_ms": 10
+  },
+  "runs": [
+    {
+      "offered_msg_per_s": 1000,
+      "drones": 54,
+      "sent": 10000,
+      "send_seconds": 10.0,
+      "achieved_msg_per_s": 1000.0,
+      "consumed": 10000,
+      "measured": 9000,
+      "ms": {
+        "p50": 1.423,
+        "p95": 2.129,
+        "p99": 2.697,
+        "max": 4.795
+      }
+    },
+    {
+      "offered_msg_per_s": 5000,
+      "drones": 216,
+      "sent": 50000,
+      "send_seconds": 10.0,
+      "achieved_msg_per_s": 5000.1,
+      "consumed": 50000,
+      "measured": 45000,
+      "ms": {
+        "p50": 1.381,
+        "p95": 2.594,
+        "p99": 3.33,
+        "max": 5.446
+      }
+    },
+    {
+      "offered_msg_per_s": 20000,
+      "drones": 864,
+      "sent": 200000,
+      "send_seconds": 10.0,
+      "achieved_msg_per_s": 20000.1,
+      "consumed": 200000,
+      "measured": 180000,
+      "ms": {
+        "p50": 1.246,
+        "p95": 2.484,
+        "p99": 3.417,
+        "max": 20.336
+      }
+    },
+    {
+      "offered_msg_per_s": 50000,
+      "drones": 2106,
+      "sent": 500000,
+      "send_seconds": 10.0,
+      "achieved_msg_per_s": 50000.1,
+      "consumed": 500000,
+      "measured": 450000,
+      "ms": {
+        "p50": 1.703,
+        "p95": 15.082,
+        "p99": 26.425,
+        "max": 33.354
+      }
+    }
+  ],
+  "environment": {
+    "mode": "kafka @ localhost:19092",
+    "cpus_usable": 8,
+    "machine": "c7i.2xlarge",
+    "platform": "Linux-7.0.0-1014-aws-x86_64-with-glibc2.39",
+    "python": "3.12.3",
+    "started_utc": "2026-11-11T00:17:39Z",
+    "command": "tools/scale_test.py latency",
+    "note": "partitions statically assigned (assign(), not subscribe()) so group-rebalance time is excluded; one warm-up run discarded per configuration"
+  },
+  "total_seconds": 53.9
+}

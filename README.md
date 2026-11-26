@@ -202,37 +202,42 @@ paced rate, one consumer: median 1.3–1.4 ms and p99 under 3.5 ms up to
 
 ### Machine learning in the stream (Track B)
 
-`python train_ml.py`. Per drone, per 15 s window, 47 features, built by the
-live pipeline itself. Every number is for data the model was not trained on.
+`python train_ml.py` on the AWS instance (scikit-learn 1.5.2, as pinned).
+Per drone, per 15 s window, 47 features, built by the live pipeline itself.
+Every number is for data the model was not trained on.
 
 | Attack | Isolation Forest AUC | attacked drone alerted | Random Forest AUC (attack type unseen) | attacked drone alerted |
 |---|---|---|---|---|
 | Critical Node | 0.94 | yes, 25 s | 1.00 | yes, 190 s |
 | MITM | 0.91 | yes, 85 s | 0.78 | no |
-| Data manipulation | 0.89 | yes, 25 s | 0.91 | yes, 10 s |
-| Data manipulation 2 | 0.97 | yes, 25 s | 1.00 | yes, 10 s |
+| Data manipulation | 0.89 | yes, 25 s | 0.93 | yes, 10 s |
+| Data manipulation 2 | 0.96 | yes, 25 s | 1.00 | yes, 10 s |
 | Sybil | 1.00 | 8 of 8, 25 s | 1.00 | 8 of 8, 10 s |
 
 False alarms on a second clean recording: 0 windows, 0 drones (both
-models). The anomaly detector also puts 0–6 honest drones per attack session
+models), and no alert in any session before its attack began. A 10 s delay
+means the alert came from the 15 s window in which the attack started.
+(In the committed `results_ml.json`, `alerts_before_onset` still counts those
+onset-window alerts -- all of them on attacked drones; the code now reports
+them separately as `alerts_from_onset_window`.) The anomaly detector also puts 0–6 honest drones per attack session
 on the watch list — drones disturbed by the attack — which is why it never
 triggers an action on its own. The deployed classifier is trained without
 Critical Node, so the live demo shows it on a recording it never saw.
 
 ### Training scalability
 
-`python tools/train_scale.py` (development machine, 2 CPUs). The swarm is
-cloned as in the swarm experiment; accuracy is measured on the same
-original-size test data at every size.
+`python tools/train_scale.py` on the AWS instance (m7i-flex.large, 2 vCPUs,
+pinned versions). The swarm is cloned as in the swarm experiment; accuracy
+is measured on the same original-size test data at every size.
 
 | Data | Messages | Windows | Feature extraction | RF fit | Peak memory | RF AUC (unseen attack) |
 |---|---|---|---|---|---|---|
-| 1× | 83,906 | 3,146 | 5.2 s | 0.5 s | 182 MB | 0.93 |
-| 3× | 251,718 | 9,438 | 9.4 s | 0.7 s | 199 MB | 0.93 |
-| 10× | 839,060 | 31,460 | 21 s | 1.3 s | 238 MB | 0.90 |
-| 30× | 2,517,180 | 94,380 | 54 s | 2.5 s | 397 MB | 0.90 |
+| 1× | 83,906 | 3,146 | 4.2 s | 0.4 s | 203 MB | 0.95 |
+| 3× | 251,718 | 9,438 | 7.1 s | 0.7 s | 218 MB | 0.93 |
+| 10× | 839,060 | 31,460 | 16 s | 1.2 s | 266 MB | 0.92 |
+| 30× | 2,517,180 | 94,380 | 42 s | 2.8 s | 425 MB | 0.92 |
 
-Cost grows at most linearly; accuracy is stable. Clones add no new
+30× the data costs 7× the fit time and 2× the memory; AUC stays within 0.92–0.95. Clones add no new
 information, so this shows the training path scales, not that more data
 improves the models. The Isolation Forest's fit time is nearly constant by
 design: each tree is built from a fixed 256-sample subsample.

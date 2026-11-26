@@ -1,5 +1,5 @@
 {
-  "sklearn": "1.9.1",
+  "sklearn": "1.5.2",
   "n_features": 47,
   "features": [
     "DT_RotorAvgSpeed_mean",
@@ -228,8 +228,8 @@
       "CriticalNode": {
         "window": {
           "auc": {
-            "mean": 0.9969,
-            "std": 0.0023
+            "mean": 0.9991,
+            "std": 0.0017
           },
           "precision": {
             "mean": 1.0,
@@ -264,8 +264,8 @@
       "MITM": {
         "window": {
           "auc": {
-            "mean": 0.7875,
-            "std": 0.0227
+            "mean": 0.7775,
+            "std": 0.0158
           },
           "precision": {
             "mean": 0.0,
@@ -300,23 +300,23 @@
       "DataManipulation": {
         "window": {
           "auc": {
-            "mean": 0.9164,
-            "std": 0.0081
+            "mean": 0.9296,
+            "std": 0.0077
           },
           "precision": {
             "mean": 1.0,
             "std": 0.0
           },
           "recall": {
-            "mean": 0.6,
+            "mean": 0.2,
             "std": 0.0
           },
           "f1": {
-            "mean": 0.75,
+            "mean": 0.3333,
             "std": 0.0
           },
           "flagged_rate": {
-            "mean": 0.0119,
+            "mean": 0.004,
             "std": 0.0
           }
         },
@@ -336,24 +336,24 @@
       "DataManipulation2": {
         "window": {
           "auc": {
-            "mean": 1.0,
-            "std": 0.0
+            "mean": 0.9991,
+            "std": 0.0019
           },
           "precision": {
-            "mean": 0.7909,
-            "std": 0.0373
+            "mean": 0.96,
+            "std": 0.0894
           },
           "recall": {
-            "mean": 1.0,
-            "std": 0.0
+            "mean": 0.6667,
+            "std": 0.1361
           },
           "f1": {
-            "mean": 0.8829,
-            "std": 0.0235
+            "mean": 0.7843,
+            "std": 0.1248
           },
           "flagged_rate": {
-            "mean": 0.0533,
-            "std": 0.0026
+            "mean": 0.029,
+            "std": 0.0039
           }
         },
         "held_out_window_fpr": {
@@ -364,7 +364,7 @@
           "attacked_drones": 1,
           "attacked_alerted": 1,
           "first_delay_s": 10,
-          "honest_drones_alerted_during_attack": 2,
+          "honest_drones_alerted_during_attack": 1,
           "alerts_before_onset": 1,
           "drones_total": 54
         }
@@ -376,7 +376,7 @@
             "std": 0.0
           },
           "precision": {
-            "mean": 0.9917,
+            "mean": 1.0,
             "std": 0.0
           },
           "recall": {
@@ -384,11 +384,11 @@
             "std": 0.0
           },
           "f1": {
-            "mean": 0.9959,
+            "mean": 1.0,
             "std": 0.0
           },
           "flagged_rate": {
-            "mean": 0.4116,
+            "mean": 0.4082,
             "std": 0.0
           }
         },
@@ -400,7 +400,7 @@
           "attacked_drones": 8,
           "attacked_alerted": 8,
           "first_delay_s": 10,
-          "honest_drones_alerted_during_attack": 1,
+          "honest_drones_alerted_during_attack": 0,
           "alerts_before_onset": 8,
           "drones_total": 62
         }
@@ -410,32 +410,32 @@
       "DataManipulation->DataManipulation2": {
         "window": {
           "auc": {
-            "mean": 0.9989,
-            "std": 0.0
+            "mean": 0.9997,
+            "std": 0.0005
           },
           "precision": {
-            "mean": 0.6356,
-            "std": 0.0383
+            "mean": 0.9,
+            "std": 0.0
           },
           "recall": {
             "mean": 1.0,
             "std": 0.0
           },
           "f1": {
-            "mean": 0.7767,
-            "std": 0.0284
+            "mean": 0.9474,
+            "std": 0.0
           },
           "flagged_rate": {
-            "mean": 0.0664,
-            "std": 0.0039
+            "mean": 0.0467,
+            "std": 0.0
           }
         },
         "drone": {
           "attacked_drones": 1,
           "attacked_alerted": 1,
           "first_delay_s": 10,
-          "honest_drones_alerted_during_attack": 6,
-          "alerts_before_onset": 3,
+          "honest_drones_alerted_during_attack": 1,
+          "alerts_before_onset": 1,
           "drones_total": 54
         }
       }
@@ -451,52 +451,52 @@
     "excluded": [
       "CriticalNode"
     ],
-    "sklearn": "1.9.1",
+    "sklearn": "1.5.2",
     "n_train_windows": 1372,
     "n_baseline_windows": 199,
-    "train_seconds_iforest": 0.319,
-    "train_seconds_rf": 0.576,
-    "score_ms_per_batch_of_54_windows": 30.22,
+    "train_seconds_iforest": 0.224,
+    "train_seconds_rf": 0.432,
+    "score_ms_per_batch_of_54_windows": 8.91,
     "rf_top_features": [
       {
         "feature": "max_streak",
-        "importance": 0.1512
+        "importance": 0.1472
       },
       {
         "feature": "streak_end",
-        "importance": 0.1094
+        "importance": 0.108
       },
       {
         "feature": "alive_while_silent",
-        "importance": 0.0767
+        "importance": 0.0709
       },
       {
         "feature": "initiated_ok_rate",
-        "importance": 0.0538
-      },
-      {
-        "feature": "n_initiated",
-        "importance": 0.041
-      },
-      {
-        "feature": "Trust_Score_mean",
-        "importance": 0.0397
+        "importance": 0.0609
       },
       {
         "feature": "Trust_BA_max",
-        "importance": 0.0393
+        "importance": 0.0469
+      },
+      {
+        "feature": "n_initiated",
+        "importance": 0.0443
       },
       {
         "feature": "n_requests",
-        "importance": 0.0367
+        "importance": 0.0398
       },
       {
-        "feature": "Trust_SM_min",
-        "importance": 0.0348
+        "feature": "Trust_Score_max",
+        "importance": 0.0347
       },
       {
-        "feature": "Trust_CR_mean",
-        "importance": 0.0333
+        "feature": "Trust_BA_mean",
+        "importance": 0.0314
+      },
+      {
+        "feature": "DT_RotorAvgSpeed_mean",
+        "importance": 0.0306
       }
     ]
   }
