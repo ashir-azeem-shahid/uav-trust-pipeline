@@ -103,6 +103,8 @@ class Verdict:
     anomaly_score: float | None = None
     p_compromised: float | None = None
     window_start: int | None = None
+    attack_type: str | None = None     # what the rule or classifier named
+    stage: str | None = None           # "rule" or "ml" (cascade stage)
     decision: str | None = None        # operator: ACCEPT / REJECT / None
     decided_at: float | None = None
 
@@ -128,6 +130,10 @@ class Verdict:
 
 SIGNAL_NAME = {"A": "Rule", "B-RF": "Classifier", "B-IF": "Anomaly",
                "DQ": "Data quality"}
+# The layer of the cascade a signal comes from, as the operator sees it
+LAYER_NAME = {"A": "Rule", "B-RF": "ML", "B-IF": "ML"}
+ATTACK_LABEL = {"CriticalNode": "Critical Node", "DataManipulation": "Data manipulation",
+                "MITM": "Man-in-the-middle", "Sybil": "Sybil"}
 # Signals that raise an ALERT. The anomaly detector alone raises a WATCH:
 # it notices that something is unusual, not that a drone is compromised.
 ALERT_TRACKS = {"A", "B-RF"}
@@ -173,6 +179,41 @@ class Incident:
     def actionable(self) -> bool:
         return all(v.actionable for v in self.signals)
 
+    @property
+    def alert_signals(self) -> list:
+        return [v for v in self.signals if v.track in ALERT_TRACKS]
+
+    @property
+    def attack_type(self) -> str | None:
+        """The attack named for this drone: the rule's if one fired (rules
+        name the type by construction), else the classifier's."""
+        for track in ("A", "B-RF"):
+            for v in self.signals:
+                if v.track == track and v.attack_type:
+                    return v.attack_type
+        return None
+
+    @property
+    def caught_by(self) -> str:
+        """Which cascade layer raised the alert, in the order they fired:
+        'Rule', 'ML', 'ML, then Rule' ... For a watch: 'ML (anomaly)'."""
+        sigs = self.alert_signals
+        if not sigs:
+            return "ML (anomaly)"
+        layers = list(dict.fromkeys(LAYER_NAME[v.track] for v in sigs))
+        return ", then ".join(layers)
+
+    @property
+    def alert_t(self) -> int:
+        sigs = self.alert_signals or self.signals
+        return min(v.t_session for v in sigs)
+
+    @property
+    def alert_delay_s(self) -> int | None:
+        ds = [v.detection_delay_s for v in (self.alert_signals or self.signals)
+              if v.detection_delay_s is not None]
+        return min(ds) if ds else None
+
 
 class LiveState:
     """
@@ -191,6 +232,10 @@ class LiveState:
         self.messages: int = 0
         self.quarantined: int = 0
         self.attack_type: str | None = None
+        # recorded mode only: ground truth, to mark alerts right or wrong.
+        # Never read by a detector.
+        self.gt_victim: str | None = None
+        self.ml_gated: int | None = None              # windows the rules gated
         # pipeline view
         self.partitions: Counter = Counter()          # live only
         self.rate_samples: deque = deque()            # (wall time, messages)
@@ -347,6 +392,8 @@ class LiveState:
             anomaly_score=v.get("anomaly_score"),
             p_compromised=v.get("p_compromised"),
             window_start=v.get("window_start"),
+            attack_type=v.get("attack_type"),
+            stage=v.get("stage"),
         )
         self.verdicts.append(ver)
         if ver.verdict == "QUARANTINE":
@@ -438,14 +485,57 @@ class LiveState:
             "quarantined": self.quarantined,
         }
 
+    # -- ground truth (recorded mode only) -----------------------------
+    @property
+    def has_ground_truth(self) -> bool:
+        return self.gt_victim is not None or self.attack_type is not None
+
+    def is_attacker(self, drone: str) -> bool | None:
+        """Ground truth for one drone, or None when unknown (live mode).
+        Sybil's malicious identities are the fabricated Ghost drones."""
+        if not self.has_ground_truth:
+            return None
+        if (self.attack_type or "").lower() == "sybil":
+            return "ghost" in drone.lower()
+        return drone == self.gt_victim
+
+    def run_scorecard(self) -> dict | None:
+        """This run against ground truth: attacked drones caught (and named
+        right), and honest drones raised as alerts or watches."""
+        if not self.has_ground_truth:
+            return None
+        attacked = sorted(n for n, d in self.drones.items()
+                          if d.n_target and self.is_attacker(n))
+        incs = self.incidents
+        caught = [n for n in attacked
+                  if n in incs and incs[n].severity == "alert"]
+        # the recording writes "Data Manipulation", the detectors "DataManipulation"
+        want = (self.attack_type or "").replace(" ", "").lower()
+        named = [n for n in caught
+                 if (incs[n].attack_type or "").lower() == want]
+        fa = sorted(n for n, i in incs.items()
+                    if i.severity == "alert" and not self.is_attacker(n))
+        fw = sorted(n for n, i in incs.items()
+                    if i.severity == "watch" and not self.is_attacker(n))
+        return {"attacked": attacked, "caught": caught, "named": named,
+                "false_alerts": fa, "false_watches": fw}
+
     def swarm_table(self) -> list[dict]:
+        order = {"ISOLATED": 0, "FLAGGED": 1, "WATCH": 2, "LOW": 3,
+                 "DEGRADED": 4, "UNKNOWN": 5, "TRUSTED": 6}
         rows = []
         for name, d in self.drones.items():
             if not d.n_target:
                 continue
+            inc = self.incidents.get(name)
+            alerted = inc is not None and d.band in ("ISOLATED", "FLAGGED", "WATCH")
             rows.append({
                 "drone": name,
                 "band": d.band,
+                "attack_type": ATTACK_LABEL.get(inc.attack_type, inc.attack_type)
+                               if alerted and inc.attack_type else None,
+                "caught_by": inc.caught_by if alerted else None,
+                "mean_dq": (sum(d.dq) / len(d.dq)) if d.dq else None,
                 "trust": round(d.last_trust, 4) if d.last_trust is not None else None,
                 "timeout_rate": round(d.timeout_rate, 3),
                 "streak": d.streak,
@@ -455,7 +545,9 @@ class LiveState:
                 "anomaly": (None if d.ml_anomalous is None
                             else ("unusual" if d.ml_anomalous else "normal")),
             })
-        rows.sort(key=lambda r: (-r["max_streak"], -r["timeout_rate"]))
+        rows.sort(key=lambda r: (order.get(r["band"], 9),
+                                 r["trust"] if r["trust"] is not None else 2.0,
+                                 r["drone"]))
         return rows
 
 
@@ -591,6 +683,8 @@ def build_offline(attack: str, until: int | None = None,
         state.apply_telemetry(msg, dq_res, st.streak if st else None)
         if msg["_gt"].get("attack_type"):
             state.attack_type = msg["_gt"]["attack_type"]
+        if msg["_gt"].get("attack_target"):
+            state.gt_victim = msg["_gt"]["attack_target"]
         if v:
             state.apply_verdict(v)
         for mv in pipe.drain_ml():
@@ -599,4 +693,6 @@ def build_offline(attack: str, until: int | None = None,
         pipe.finish()
         for mv in pipe.drain_ml():
             state.apply_verdict(mv)
+    if ml:
+        state.ml_gated = pipe.ml_gated
     return state
