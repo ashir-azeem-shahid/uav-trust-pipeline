@@ -334,6 +334,37 @@ Send-to-verdict latency, producer and consumer running concurrently at a
 paced rate, one consumer: median 1.3–1.4 ms and p99 under 3.5 ms up to
 20,000 msg/s; at 50,000 msg/s median 1.7 ms, p99 26 ms.
 
+### Scaling after the rules and cascade change
+
+The AWS numbers above were measured before this branch added three rules
+and the multiclass forest. To see what the change costs, the old code
+(`main` before the change) and the new code were run back to back on the
+same machine (a 4-CPU cloud container, Python 3.12, Redpanda in docker),
+`docs/scaling_rerun/old_vs_new_same_machine.json`. Only the ratio between
+old and new is meaningful here, not the absolute values.
+
+| Measurement | Old | New | Change |
+|---|---|---|---|
+| Kafka, 1 consumer (msg/s) | 81,270 | 61,632 | −24% |
+| Kafka, 4 consumers (msg/s, speedup) | 217,974 (2.68×) | 188,763 (3.06×) | −13% |
+| Offline, 1 consumer (msg/s) | 95,082 | 71,719 | −25% |
+| Offline, 4 consumers (speedup) | 3.78× | 3.62× | near-linear in both |
+| Offline, 1,728 drones (msg/s, p99 per message) | 95,000, 0.016 ms | 72,200, 0.027 ms | −24% |
+| Offline + ML, 1,728 drones (msg/s) | 44,734 | 38,311 | −14% |
+| Latency at 20,000 msg/s (median, p99) | 1.3 ms, 3.2 ms | 1.4 ms, 12 ms | median unchanged |
+| Latency at 50,000 msg/s (median, p99) | 1.7 ms, 97 ms | 110 ms, 509 ms | one consumer saturated |
+| Training, feature extraction at 30× | 39.5 s | 49.3 s | +25% |
+| Training, RF fit and peak memory at 30× | 1.1 s, 396 MB | 1.0 s, 409 MB | unchanged |
+
+The rules cost about a quarter of single-consumer throughput, because every
+message now goes through four rules instead of one. Adding consumers still
+scales close to linearly, every verdict check passed, and one consumer
+still handles about 60,000 msg/s, over 2,000× what the recorded swarm
+produces (about 25 msg/s). The cost shows up only near saturation: at
+50,000 msg/s a single consumer is now close to its limit, so queues grow
+and latency rises; a second consumer removes that. The steps to repeat the
+official AWS runs on this code are in `docs/scaling_rerun/ec2_rerun.md`.
+
 ### Machine learning in the stream (Track B)
 
 `python train_ml.py` on the AWS instance (scikit-learn 1.5.2, as pinned).
