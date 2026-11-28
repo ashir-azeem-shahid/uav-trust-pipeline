@@ -74,6 +74,7 @@ Redpanda Console on <http://localhost:8080> shows the messages.
 | `ml.py` | Track B live: per-drone 15 s windows built inside the pipeline, Isolation Forest + multiclass Random Forest (normal or attack type), explained alerts. One feature code path for training and serving. |
 | `train_ml.py` | Trains and evaluates the live models (leave-one-attack-out, held-out clean recording) and compares rules only, ML only and the cascade (accuracy, per-class P/R/F1, confusion matrices); writes `models/ml.joblib`. |
 | `respond.py` | Autonomous responder: isolates a drone on a rule alert after a grace period unless an operator holds it; classifier alerts wait for an operator. Writes `uav.action`. |
+| `inject.py` | Attack injection: MITM, Critical Node, data manipulation and Sybil applied to a clean recording at a chosen strength, mirroring Fečák's simulator. |
 | `faults.py` | Benign fault definitions (noise, out-of-range, corrupt trust, dropout, duplicate, position jump). |
 | `features.py` | 15-second windows and features for the models; reproduces the bachelor thesis's windowing for comparison. |
 | `train.py` | Track B: supervised Random Forest / SVM with feature-group ablation. |
@@ -89,6 +90,7 @@ Redpanda Console on <http://localhost:8080> shows the messages.
 | `tools/analysis3.py` | Data diagnostics — the go/no-go test on the raw CSVs. |
 | `tools/simulate.py` | Replays through simulated partitioned consumers. Proves the architecture before Kafka. |
 | `tools/sweep_streak.py` | Threshold sensitivity sweep + the max-streak separation table. |
+| `tools/inject_test.py` | Detection and false alarms against attack strength on the held-out flight: rules, forest, cascade, Isolation Forest (`results_injection.json`, `docs/injection/`). |
 | `tools/sweep_rules.py` | Threshold sensitivity of the Sybil, data manipulation and MITM rules (`results_rule_sweep.json`). |
 | `tests/test_leakage.py` | Asserts ground truth never reaches the operational path. |
 | `tests/test_rules.py` | Each rule ignores ground truth, catches its own attack and nothing else; ML is gated by the rules; the classifier names the attack. |
@@ -243,6 +245,74 @@ positives are optimistic. Benign faults (`tools/fault_inject.py`): at a 5%
 corruption rate no rule's output changes; at 20%, 250 m position jumps make
 2–3 honest drones look like data manipulation and corrupted trust values
 make one look like MITM.
+
+### Injected attacks: where each detector stops working
+
+`python tools/inject_test.py` (≈3 min), `results_injection.json`, plots in
+`docs/injection/`. The recorded sessions hold each attack once, at one
+strength. `inject.py` re-applies each attack to a clean recording at
+strengths from far below to above the recorded one, following how Fečák's
+simulator implements it (MITM delay and loss on the victim's frames,
+Critical Node reply suppression, data manipulation of speed / position /
+rotor fields, Sybil ghosts that may partly answer), including Brno.py's rule
+that a timeout is only logged above 50% loss and its trust formulas.
+
+* **Test flight:** the held-out clean recording, never used for training or
+  for choosing any threshold. 8 runs per setting, random target (any drone
+  asked for data at least 20 times after the onset) and random onset.
+* **Rules:** thresholds frozen exactly as committed before this test.
+* **Random Forest:** trained on the recorded sessions plus attacks injected
+  into the *other* clean flight (different seeds, targets, onsets).
+  **Caveat:** training and test attacks come from the same injector, so
+  this forest has learned the injector's fingerprint; its curves are an
+  upper bound. **RF (recorded)** is the forest trained on the recordings
+  only, the honest test of generalisation.
+
+Detected share of attacked drones (honest drones flagged per run in
+brackets). With no attack at all, no method flags the randomly chosen
+target; the injection-trained forest flags the same 2 honest drones in
+every run of this flight.
+
+| Attack, strength | Rules | RF (recorded) | RF | Rules → RF | Isolation Forest |
+|---|---|---|---|---|---|
+| MITM, loss 0.05 → 0.6 (delay 1.5 s) | 0 → 0 | 0 → 0.12 | 0.50 → 0.88 (2) | same as RF | 0 |
+| MITM, delay 0.2 → 2 s (loss 0.4) | 0 | 0 | 0.75 → 0.88 (2) | same as RF | 0 |
+| Critical Node, 25% → 100% of replies suppressed | 0 | 0 → 0.88 | 0.50 → 0.88 (2) | same as RF | 0 → 0.88 |
+| Data manipulation, all fields, 10% → 100% | 0 → 1.00 (from 75%) | 0 → 1.00 (only at 100%) | 1.00 (2) | 1.00, faster | 0 → 0.25 |
+| Data manipulation, speed only | 0 → 0.12 | 0 | 0.50 → 1.00 (2) | same as RF | 0 |
+| Data manipulation, position only | 0 | 0 | 0.50 → 0.88 (2) | same as RF | 0 |
+| Sybil, 1–10 silent ghosts | 1.00 | 1.00 | 1.00 (2) | 1.00, faster | 1.00 |
+| Sybil, 5 ghosts answering 0% → 60% | 1.00 → 0.03 | 1.00 → 0 | 1.00 (2) | 1.00 | 1.00 → 0 |
+
+What this says:
+
+* **The frozen rules do not transfer.** The Critical Node and MITM rules
+  never fire on the held-out flight, not even at the recorded strength:
+  that flight carries about a third of the traffic of the attack sessions,
+  so 80 unanswered requests in a row (Critical Node) or 50+ exchanges in
+  each direction (MITM) never accumulate, and most targets send no requests
+  of their own (proof of life). Even on the two busiest drones
+  (`busy target` sweeps) they stay silent. The data manipulation rule needs
+  75% of the recorded strength; the Sybil rule is perfect for silent ghosts
+  and collapses as soon as ghosts answer one request in ten.
+* **The forest trained on the recordings alone** only recognises attacks
+  close to the recorded strength, and names the wrong type for Critical
+  Node and Sybil.
+* **A forest that has seen varied strengths** (here, injected into another
+  flight) detects most attacks at every strength tested, but slowly (median
+  about 2 minutes for MITM and Critical Node), names the Critical Node type
+  poorly, and costs 2 false alarms per run on this flight. It is an upper
+  bound, for the reason above.
+* **Rules → RF** equals the forest almost everywhere; the rules only make
+  blatant data manipulation and silent Sybil faster.
+* So for this thesis: machine learning is the core detector, rules are a
+  cheap fast path for blatant, well-defined attacks, and rule thresholds
+  tuned on one traffic regime should not be expected to hold in another.
+
+Data manipulation, recording 1 → recording 2 and back (forest trained on
+the clean baseline, the other three attack types and one data manipulation
+recording; window-level F1 for the data manipulation class): rules 1.00 /
+1.00, forest 0.95 / 0.75, rules → forest 0.95 / 1.00.
 
 ### Scalability and latency through Kafka
 

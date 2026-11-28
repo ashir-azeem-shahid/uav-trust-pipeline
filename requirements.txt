@@ -10,6 +10,7 @@ scikit-learn==1.5.2
 joblib==1.4.2
 
 streamlit==1.38.0
+matplotlib==3.9.2   # tools/inject_test.py plots only
 
 pyarrow==17.0.0
 boto3==1.35.36

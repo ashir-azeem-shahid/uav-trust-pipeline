@@ -1,0 +1,2346 @@
+{
+  "test_flight": "20260510_123058_Baseline.csv",
+  "train_flight": "baseline.csv",
+  "seeds_per_setting": 8,
+  "train_seeds_per_setting": 3,
+  "min_requests_to_target_after_onset": 20,
+  "frozen_rule_thresholds": {
+    "DEFAULT_STREAK": 80,
+    "SYBIL_MIN_REQUESTS": 5,
+    "ROTOR_MIN_AIRBORNE": 200.0,
+    "AIRBORNE_Z": -5.0,
+    "SPEED_TOLERANCE": 5.0,
+    "DM_CONSECUTIVE": 5,
+    "MITM_HISTORY": 100,
+    "MITM_FAIL_RATE": 0.75,
+    "MITM_MIN_RTT_S": 1.0,
+    "MITM_RTT_SAMPLES": 8
+  },
+  "sweeps": [
+    {
+      "attack": "MITM",
+      "axis": "loss, delay 1.5 s",
+      "key": "loss",
+      "points": [
+        {
+          "x": 0.05,
+          "params": {
+            "loss": 0.05,
+            "delay": 1.5
+          },
+          "methods": {
+            "rules": {
+              "detected": 0.0,
+              "named": 0.0,
+              "median_delay_s": null,
+              "false_alarms_per_run": 0
+            },
+            "rf": {
+              "detected": 0.5,
+              "named": 0.5,
+              "median_delay_s": 125.0,
+              "false_alarms_per_run": 2
+            },
+            "cascade": {
+              "detected": 0.5,
+              "named": 0.5,
+              "median_delay_s": 125.0,
+              "false_alarms_per_run": 2
+            },
+            "rf_recorded": {
+              "detected": 0.0,
+              "named": 0.0,
+              "median_delay_s": null,
+              "false_alarms_per_run": 0
+            },
+            "cascade_recorded": {
+              "detected": 0.0,
+              "named": 0.0,
+              "median_delay_s": null,
+              "false_alarms_per_run": 0
+            },
+            "iforest": {
+              "detected": 0.0,
+              "named": 0.0,
+              "median_delay_s": null,
+              "false_alarms_per_run": 0
+            }
+          }
+        },
+        {
+          "x": 0.1,
+          "params": {
+            "loss": 0.1,
+            "delay": 1.5
+          },
+          "methods": {
+            "rules": {
+              "detected": 0.0,
+              "named": 0.0,
+              "median_delay_s": null,
+              "false_alarms_per_run": 0
+            },
+            "rf": {
+              "detected": 0.625,
+              "named": 0.625,
+              "median_delay_s": 123,
+              "false_alarms_per_run": 2
+            },
+            "cascade": {
+              "detected": 0.625,
+              "named": 0.625,
+              "median_delay_s": 123,
+              "false_alarms_per_run": 2
+            },
+            "rf_recorded": {
+              "detected": 0.0,
+              "named": 0.0,
+              "median_delay_s": null,
+              "false_alarms_per_run": 0
+            },
+            "cascade_recorded": {
+              "detected": 0.0,
+              "named": 0.0,
+              "median_delay_s": null,
+              "false_alarms_per_run": 0
+            },
+            "iforest": {
+              "detected": 0.0,
+              "named": 0.0,
+              "median_delay_s": null,
+              "false_alarms_per_run": 0
+            }
+          }
+        },
+        {
+          "x": 0.2,
+          "params": {
+            "loss": 0.2,
+            "delay": 1.5
+          },
+          "methods": {
+            "rules": {
+              "detected": 0.0,
+              "named": 0.0,
+              "median_delay_s": null,
+              "false_alarms_per_run": 0
+            },
+            "rf": {
+              "detected": 0.75,
+              "named": 0.75,
+              "median_delay_s": 125.0,
+              "false_alarms_per_run": 2
+            },
+            "cascade": {
+              "detected": 0.75,
+              "named": 0.75,
+              "median_delay_s": 125.0,
+              "false_alarms_per_run": 2
+            },
+            "rf_recorded": {
+              "detected": 0.0,
+              "named": 0.0,
+              "median_delay_s": null,
+              "false_alarms_per_run": 0
+            },
+            "cascade_recorded": {
+              "detected": 0.0,
+              "named": 0.0,
+              "median_delay_s": null,
+              "false_alarms_per_run": 0
+            },
+            "iforest": {
+              "detected": 0.0,
+              "named": 0.0,
+              "median_delay_s": null,
+              "false_alarms_per_run": 0
+            }
+          }
+        },
+        {
+          "x": 0.4,
+          "params": {
+            "loss": 0.4,
+            "delay": 1.5
+          },
+          "methods": {
+            "rules": {
+              "detected": 0.0,
+              "named": 0.0,
+              "median_delay_s": null,
+              "false_alarms_per_run": 0
+            },
+            "rf": {
+              "detected": 0.875,
+              "named": 0.625,
+              "median_delay_s": 126,
+              "false_alarms_per_run": 2
+            },
+            "cascade": {
+              "detected": 0.875,
+              "named": 0.625,
+              "median_delay_s": 126,
+              "false_alarms_per_run": 2
+            },
+            "rf_recorded": {
+              "detected": 0.0,
+              "named": 0.0,
+              "median_delay_s": null,
+              "false_alarms_per_run": 0
+            },
+            "cascade_recorded": {
+              "detected": 0.0,
+              "named": 0.0,
+              "median_delay_s": null,
+              "false_alarms_per_run": 0
+            },
+            "iforest": {
+              "detected": 0.0,
+              "named": 0.0,
+              "median_delay_s": null,
+              "false_alarms_per_run": 0
+            }
+          }
+        },
+        {
+          "x": 0.6,
+          "params": {
+            "loss": 0.6,
+            "delay": 1.5
+          },
+          "methods": {
+            "rules": {
+              "detected": 0.0,
+              "named": 0.0,
+              "median_delay_s": null,
+              "false_alarms_per_run": 0
+            },
+            "rf": {
+              "detected": 0.875,
+              "named": 0.5,
+              "median_delay_s": 126,
+              "false_alarms_per_run": 2.12
+            },
+            "cascade": {
+              "detected": 0.875,
+              "named": 0.5,
+              "median_delay_s": 126,
+              "false_alarms_per_run": 2.12
+            },
+            "rf_recorded": {
+              "detected": 0.125,
+              "named": 0.125,
+              "median_delay_s": 130,
+              "false_alarms_per_run": 0
+            },
+            "cascade_recorded": {
+              "detected": 0.125,
+              "named": 0.125,
+              "median_delay_s": 130,
+              "false_alarms_per_run": 0
+            },
+            "iforest": {
+              "detected": 0.0,
+              "named": 0.0,
+              "median_delay_s": null,
+              "false_alarms_per_run": 0
+            }
+          }
+        }
+      ]
+    },
+    {
+      "attack": "MITM",
+      "axis": "delay s, loss 0.4",
+      "key": "delay",
+      "points": [
+        {
+          "x": 0.2,
+          "params": {
+            "loss": 0.4,
+            "delay": 0.2
+          },
+          "methods": {
+            "rules": {
+              "detected": 0.0,
+              "named": 0.0,
+              "median_delay_s": null,
+              "false_alarms_per_run": 0
+            },
+            "rf": {
+              "detected": 0.75,
+              "named": 0.625,
+              "median_delay_s": 125.0,
+              "false_alarms_per_run": 2
+            },
+            "cascade": {
+              "detected": 0.75,
+              "named": 0.625,
+              "median_delay_s": 125.0,
+              "false_alarms_per_run": 2
+            },
+            "rf_recorded": {
+              "detected": 0.0,
+              "named": 0.0,
+              "median_delay_s": null,
+              "false_alarms_per_run": 0
+            },
+            "cascade_recorded": {
+              "detected": 0.0,
+              "named": 0.0,
+              "median_delay_s": null,
+              "false_alarms_per_run": 0
+            },
+            "iforest": {
+              "detected": 0.0,
+              "named": 0.0,
+              "median_delay_s": null,
+              "false_alarms_per_run": 0
+            }
+          }
+        },
+        {
+          "x": 0.5,
+          "params": {
+            "loss": 0.4,
+            "delay": 0.5
+          },
+          "methods": {
+            "rules": {
+              "detected": 0.0,
+              "named": 0.0,
+              "median_delay_s": null,
+              "false_alarms_per_run": 0
+            },
+            "rf": {
+              "detected": 0.75,
+              "named": 0.625,
+              "median_delay_s": 125.0,
+              "false_alarms_per_run": 2
+            },
+            "cascade": {
+              "detected": 0.75,
+              "named": 0.625,
+              "median_delay_s": 125.0,
+              "false_alarms_per_run": 2
+            },
+            "rf_recorded": {
+              "detected": 0.0,
+              "named": 0.0,
+              "median_delay_s": null,
+              "false_alarms_per_run": 0
+            },
+            "cascade_recorded": {
+              "detected": 0.0,
+              "named": 0.0,
+              "median_delay_s": null,
+              "false_alarms_per_run": 0
+            },
+            "iforest": {
+              "detected": 0.0,
+              "named": 0.0,
+              "median_delay_s": null,
+              "false_alarms_per_run": 0
+            }
+          }
+        },
+        {
+          "x": 1.0,
+          "params": {
+            "loss": 0.4,
+            "delay": 1.0
+          },
+          "methods": {
+            "rules": {
+              "detected": 0.0,
+              "named": 0.0,
+              "median_delay_s": null,
+              "false_alarms_per_run": 0
+            },
+            "rf": {
+              "detected": 0.75,
+              "named": 0.625,
+              "median_delay_s": 125.0,
+              "false_alarms_per_run": 2
+            },
+            "cascade": {
+              "detected": 0.75,
+              "named": 0.625,
+              "median_delay_s": 125.0,
+              "false_alarms_per_run": 2
+            },
+            "rf_recorded": {
+              "detected": 0.0,
+              "named": 0.0,
+              "median_delay_s": null,
+              "false_alarms_per_run": 0
+            },
+            "cascade_recorded": {
+              "detected": 0.0,
+              "named": 0.0,
+              "median_delay_s": null,
+              "false_alarms_per_run": 0
+            },
+            "iforest": {
+              "detected": 0.0,
+              "named": 0.0,
+              "median_delay_s": null,
+              "false_alarms_per_run": 0
+            }
+          }
+        },
+        {
+          "x": 1.5,
+          "params": {
+            "loss": 0.4,
+            "delay": 1.5
+          },
+          "methods": {
+            "rules": {
+              "detected": 0.0,
+              "named": 0.0,
+              "median_delay_s": null,
+              "false_alarms_per_run": 0
+            },
+            "rf": {
+              "detected": 0.875,
+              "named": 0.625,
+              "median_delay_s": 126,
+              "false_alarms_per_run": 2
+            },
+            "cascade": {
+              "detected": 0.875,
+              "named": 0.625,
+              "median_delay_s": 126,
+              "false_alarms_per_run": 2
+            },
+            "rf_recorded": {
+              "detected": 0.0,
+              "named": 0.0,
+              "median_delay_s": null,
+              "false_alarms_per_run": 0
+            },
+            "cascade_recorded": {
+              "detected": 0.0,
+              "named": 0.0,
+              "median_delay_s": null,
+              "false_alarms_per_run": 0
+            },
+            "iforest": {
+              "detected": 0.0,
+              "named": 0.0,
+              "median_delay_s": null,
+              "false_alarms_per_run": 0
+            }
+          }
+        },
+        {
+          "x": 2.0,
+          "params": {
+            "loss": 0.4,
+            "delay": 2.0
+          },
+          "methods": {
+            "rules": {
+              "detected": 0.0,
+              "named": 0.0,
+              "median_delay_s": null,
+              "false_alarms_per_run": 0
+            },
+            "rf": {
+              "detected": 0.875,
+              "named": 0.625,
+              "median_delay_s": 126,
+              "false_alarms_per_run": 2
+            },
+            "cascade": {
+              "detected": 0.875,
+              "named": 0.625,
+              "median_delay_s": 126,
+              "false_alarms_per_run": 2
+            },
+            "rf_recorded": {
+              "detected": 0.0,
+              "named": 0.0,
+              "median_delay_s": null,
+              "false_alarms_per_run": 0
+            },
+            "cascade_recorded": {
+              "detected": 0.0,
+              "named": 0.0,
+              "median_delay_s": null,
+              "false_alarms_per_run": 0
+            },
+            "iforest": {
+              "detected": 0.0,
+              "named": 0.0,
+              "median_delay_s": null,
+              "false_alarms_per_run": 0
+            }
+          }
+        }
+      ]
+    },
+    {
+      "attack": "CriticalNode",
+      "axis": "share of replies suppressed",
+      "key": "q",
+      "points": [
+        {
+          "x": 0.25,
+          "params": {
+            "q": 0.25
+          },
+          "methods": {
+            "rules": {
+              "detected": 0.0,
+              "named": 0.0,
+              "median_delay_s": null,
+              "false_alarms_per_run": 0
+            },
+            "rf": {
+              "detected": 0.5,
+              "named": 0.0,
+              "median_delay_s": 127.0,
+              "false_alarms_per_run": 2
+            },
+            "cascade": {
+              "detected": 0.5,
+              "named": 0.0,
+              "median_delay_s": 127.0,
+              "false_alarms_per_run": 2
+            },
+            "rf_recorded": {
+              "detected": 0.0,
+              "named": 0.0,
+              "median_delay_s": null,
+              "false_alarms_per_run": 0
+            },
+            "cascade_recorded": {
+              "detected": 0.0,
+              "named": 0.0,
+              "median_delay_s": null,
+              "false_alarms_per_run": 0
+            },
+            "iforest": {
+              "detected": 0.0,
+              "named": 0.0,
+              "median_delay_s": null,
+              "false_alarms_per_run": 0
+            }
+          }
+        },
+        {
+          "x": 0.5,
+          "params": {
+            "q": 0.5
+          },
+          "methods": {
+            "rules": {
+              "detected": 0.0,
+              "named": 0.0,
+              "median_delay_s": null,
+              "false_alarms_per_run": 0
+            },
+            "rf": {
+              "detected": 0.875,
+              "named": 0.125,
+              "median_delay_s": 127,
+              "false_alarms_per_run": 2
+            },
+            "cascade": {
+              "detected": 0.875,
+              "named": 0.125,
+              "median_delay_s": 127,
+              "false_alarms_per_run": 2
+            },
+            "rf_recorded": {
+              "detected": 0.0,
+              "named": 0.0,
+              "median_delay_s": null,
+              "false_alarms_per_run": 0
+            },
+            "cascade_recorded": {
+              "detected": 0.0,
+              "named": 0.0,
+              "median_delay_s": null,
+              "false_alarms_per_run": 0
+            },
+            "iforest": {
+              "detected": 0.0,
+              "named": 0.0,
+              "median_delay_s": null,
+              "false_alarms_per_run": 0
+            }
+          }
+        },
+        {
+          "x": 0.75,
+          "params": {
+            "q": 0.75
+          },
+          "methods": {
+            "rules": {
+              "detected": 0.0,
+              "named": 0.0,
+              "median_delay_s": null,
+              "false_alarms_per_run": 0
+            },
+            "rf": {
+              "detected": 0.875,
+              "named": 0.25,
+              "median_delay_s": 123,
+              "false_alarms_per_run": 2
+            },
+            "cascade": {
+              "detected": 0.875,
+              "named": 0.25,
+              "median_delay_s": 123,
+              "false_alarms_per_run": 2
+            },
+            "rf_recorded": {
+              "detected": 0.0,
+              "named": 0.0,
+              "median_delay_s": null,
+              "false_alarms_per_run": 0
+            },
+            "cascade_recorded": {
+              "detected": 0.0,
+              "named": 0.0,
+              "median_delay_s": null,
+              "false_alarms_per_run": 0
+            },
+            "iforest": {
+              "detected": 0.0,
+              "named": 0.0,
+              "median_delay_s": null,
+              "false_alarms_per_run": 0
+            }
+          }
+        },
+        {
+          "x": 0.9,
+          "params": {
+            "q": 0.9
+          },
+          "methods": {
+            "rules": {
+              "detected": 0.0,
+              "named": 0.0,
+              "median_delay_s": null,
+              "false_alarms_per_run": 0
+            },
+            "rf": {
+              "detected": 1.0,
+              "named": 0.5,
+              "median_delay_s": 103.0,
+              "false_alarms_per_run": 2
+            },
+            "cascade": {
+              "detected": 1.0,
+              "named": 0.5,
+              "median_delay_s": 103.0,
+              "false_alarms_per_run": 2
+            },
+            "rf_recorded": {
+              "detected": 0.5,
+              "named": 0.0,
+              "median_delay_s": 128.5,
+              "false_alarms_per_run": 0
+            },
+            "cascade_recorded": {
+              "detected": 0.5,
+              "named": 0.0,
+              "median_delay_s": 128.5,
+              "false_alarms_per_run": 0
+            },
+            "iforest": {
+              "detected": 0.0,
+              "named": 0.0,
+              "median_delay_s": null,
+              "false_alarms_per_run": 0
+            }
+          }
+        },
+        {
+          "x": 1.0,
+          "params": {
+            "q": 1.0
+          },
+          "methods": {
+            "rules": {
+              "detected": 0.0,
+              "named": 0.0,
+              "median_delay_s": null,
+              "false_alarms_per_run": 0
+            },
+            "rf": {
+              "detected": 0.875,
+              "named": 0.125,
+              "median_delay_s": 111,
+              "false_alarms_per_run": 2
+            },
+            "cascade": {
+              "detected": 0.875,
+              "named": 0.125,
+              "median_delay_s": 111,
+              "false_alarms_per_run": 2
+            },
+            "rf_recorded": {
+              "detected": 0.875,
+              "named": 0.0,
+              "median_delay_s": 123,
+              "false_alarms_per_run": 0
+            },
+            "cascade_recorded": {
+              "detected": 0.875,
+              "named": 0.0,
+              "median_delay_s": 123,
+              "false_alarms_per_run": 0
+            },
+            "iforest": {
+              "detected": 0.875,
+              "named": 0.875,
+              "median_delay_s": 125,
+              "false_alarms_per_run": 0
+            }
+          }
+        }
+      ]
+    },
+    {
+      "attack": "DataManipulation",
+      "axis": "strength (all fields)",
+      "key": "full",
+      "points": [
+        {
+          "x": 0.1,
+          "params": {
+            "s": 0.1,
+            "variant": "full"
+          },
+          "methods": {
+            "rules": {
+              "detected": 0.0,
+              "named": 0.0,
+              "median_delay_s": null,
+              "false_alarms_per_run": 0
+            },
+            "rf": {
+              "detected": 1.0,
+              "named": 1.0,
+              "median_delay_s": 68.0,
+              "false_alarms_per_run": 2
+            },
+            "cascade": {
+              "detected": 1.0,
+              "named": 1.0,
+              "median_delay_s": 68.0,
+              "false_alarms_per_run": 2
+            },
+            "rf_recorded": {
+              "detected": 0.0,
+              "named": 0.0,
+              "median_delay_s": null,
+              "false_alarms_per_run": 0
+            },
+            "cascade_recorded": {
+              "detected": 0.0,
+              "named": 0.0,
+              "median_delay_s": null,
+              "false_alarms_per_run": 0
+            },
+            "iforest": {
+              "detected": 0.0,
+              "named": 0.0,
+              "median_delay_s": null,
+              "false_alarms_per_run": 0
+            }
+          }
+        },
+        {
+          "x": 0.25,
+          "params": {
+            "s": 0.25,
+            "variant": "full"
+          },
+          "methods": {
+            "rules": {
+              "detected": 0.0,
+              "named": 0.0,
+              "median_delay_s": null,
+              "false_alarms_per_run": 0
+            },
+            "rf": {
+              "detected": 1.0,
+              "named": 1.0,
+              "median_delay_s": 54.0,
+              "false_alarms_per_run": 2
+            },
+            "cascade": {
+              "detected": 1.0,
+              "named": 1.0,
+              "median_delay_s": 54.0,
+              "false_alarms_per_run": 2
+            },
+            "rf_recorded": {
+              "detected": 0.0,
+              "named": 0.0,
+              "median_delay_s": null,
+              "false_alarms_per_run": 0
+            },
+            "cascade_recorded": {
+              "detected": 0.0,
+              "named": 0.0,
+              "median_delay_s": null,
+              "false_alarms_per_run": 0
+            },
+            "iforest": {
+              "detected": 0.0,
+              "named": 0.0,
+              "median_delay_s": null,
+              "false_alarms_per_run": 0
+            }
+          }
+        },
+        {
+          "x": 0.5,
+          "params": {
+            "s": 0.5,
+            "variant": "full"
+          },
+          "methods": {
+            "rules": {
+              "detected": 0.25,
+              "named": 0.25,
+              "median_delay_s": 92.5,
+              "false_alarms_per_run": 0
+            },
+            "rf": {
+              "detected": 1.0,
+              "named": 1.0,
+              "median_delay_s": 54.0,
+              "false_alarms_per_run": 2
+            },
+            "cascade": {
+              "detected": 1.0,
+              "named": 1.0,
+              "median_delay_s": 54.0,
+              "false_alarms_per_run": 2
+            },
+            "rf_recorded": {
+              "detected": 0.0,
+              "named": 0.0,
+              "median_delay_s": null,
+              "false_alarms_per_run": 0
+            },
+            "cascade_recorded": {
+              "detected": 0.25,
+              "named": 0.25,
+              "median_delay_s": 92.5,
+              "false_alarms_per_run": 0
+            },
+            "iforest": {
+              "detected": 0.0,
+              "named": 0.0,
+              "median_delay_s": null,
+              "false_alarms_per_run": 0
+            }
+          }
+        },
+        {
+          "x": 0.75,
+          "params": {
+            "s": 0.75,
+            "variant": "full"
+          },
+          "methods": {
+            "rules": {
+              "detected": 1.0,
+              "named": 1.0,
+              "median_delay_s": 44.0,
+              "false_alarms_per_run": 0
+            },
+            "rf": {
+              "detected": 1.0,
+              "named": 1.0,
+              "median_delay_s": 50.0,
+              "false_alarms_per_run": 2
+            },
+            "cascade": {
+              "detected": 1.0,
+              "named": 1.0,
+              "median_delay_s": 40.5,
+              "false_alarms_per_run": 2
+            },
+            "rf_recorded": {
+              "detected": 0.125,
+              "named": 0.125,
+              "median_delay_s": 80,
+              "false_alarms_per_run": 0
+            },
+            "cascade_recorded": {
+              "detected": 1.0,
+              "named": 1.0,
+              "median_delay_s": 44.0,
+              "false_alarms_per_run": 0
+            },
+            "iforest": {
+              "detected": 0.0,
+              "named": 0.0,
+              "median_delay_s": null,
+              "false_alarms_per_run": 0
+            }
+          }
+        },
+        {
+          "x": 1.0,
+          "params": {
+            "s": 1.0,
+            "variant": "full"
+          },
+          "methods": {
+            "rules": {
+              "detected": 1.0,
+              "named": 1.0,
+              "median_delay_s": 44.0,
+              "false_alarms_per_run": 0
+            },
+            "rf": {
+              "detected": 1.0,
+              "named": 1.0,
+              "median_delay_s": 50.0,
+              "false_alarms_per_run": 2
+            },
+            "cascade": {
+              "detected": 1.0,
+              "named": 1.0,
+              "median_delay_s": 40.5,
+              "false_alarms_per_run": 2
+            },
+            "rf_recorded": {
+              "detected": 1.0,
+              "named": 1.0,
+              "median_delay_s": 50.0,
+              "false_alarms_per_run": 0
+            },
+            "cascade_recorded": {
+              "detected": 1.0,
+              "named": 1.0,
+              "median_delay_s": 40.5,
+              "false_alarms_per_run": 0
+            },
+            "iforest": {
+              "detected": 0.25,
+              "named": 0.25,
+              "median_delay_s": 111.5,
+              "false_alarms_per_run": 0
+            }
+          }
+        }
+      ]
+    },
+    {
+      "attack": "DataManipulation",
+      "axis": "strength (speed only)",
+      "key": "speed",
+      "points": [
+        {
+          "x": 0.1,
+          "params": {
+            "s": 0.1,
+            "variant": "speed"
+          },
+          "methods": {
+            "rules": {
+              "detected": 0.0,
+              "named": 0.0,
+              "median_delay_s": null,
+              "false_alarms_per_run": 0
+            },
+            "rf": {
+              "detected": 0.5,
+              "named": 0.5,
+              "median_delay_s": 97.5,
+              "false_alarms_per_run": 2
+            },
+            "cascade": {
+              "detected": 0.5,
+              "named": 0.5,
+              "median_delay_s": 97.5,
+              "false_alarms_per_run": 2
+            },
+            "rf_recorded": {
+              "detected": 0.0,
+              "named": 0.0,
+              "median_delay_s": null,
+              "false_alarms_per_run": 0
+            },
+            "cascade_recorded": {
+              "detected": 0.0,
+              "named": 0.0,
+              "median_delay_s": null,
+              "false_alarms_per_run": 0
+            },
+            "iforest": {
+              "detected": 0.0,
+              "named": 0.0,
+              "median_delay_s": null,
+              "false_alarms_per_run": 0
+            }
+          }
+        },
+        {
+          "x": 0.25,
+          "params": {
+            "s": 0.25,
+            "variant": "speed"
+          },
+          "methods": {
+            "rules": {
+              "detected": 0.0,
+              "named": 0.0,
+              "median_delay_s": null,
+              "false_alarms_per_run": 0
+            },
+            "rf": {
+              "detected": 1.0,
+              "named": 1.0,
+              "median_delay_s": 54.0,
+              "false_alarms_per_run": 2
+            },
+            "cascade": {
+              "detected": 1.0,
+              "named": 1.0,
+              "median_delay_s": 54.0,
+              "false_alarms_per_run": 2
+            },
+            "rf_recorded": {
+              "detected": 0.0,
+              "named": 0.0,
+              "median_delay_s": null,
+              "false_alarms_per_run": 0
+            },
+            "cascade_recorded": {
+              "detected": 0.0,
+              "named": 0.0,
+              "median_delay_s": null,
+              "false_alarms_per_run": 0
+            },
+            "iforest": {
+              "detected": 0.0,
+              "named": 0.0,
+              "median_delay_s": null,
+              "false_alarms_per_run": 0
+            }
+          }
+        },
+        {
+          "x": 0.5,
+          "params": {
+            "s": 0.5,
+            "variant": "speed"
+          },
+          "methods": {
+            "rules": {
+              "detected": 0.0,
+              "named": 0.0,
+              "median_delay_s": null,
+              "false_alarms_per_run": 0
+            },
+            "rf": {
+              "detected": 1.0,
+              "named": 1.0,
+              "median_delay_s": 54.0,
+              "false_alarms_per_run": 2
+            },
+            "cascade": {
+              "detected": 1.0,
+              "named": 1.0,
+              "median_delay_s": 54.0,
+              "false_alarms_per_run": 2
+            },
+            "rf_recorded": {
+              "detected": 0.0,
+              "named": 0.0,
+              "median_delay_s": null,
+              "false_alarms_per_run": 0
+            },
+            "cascade_recorded": {
+              "detected": 0.0,
+              "named": 0.0,
+              "median_delay_s": null,
+              "false_alarms_per_run": 0
+            },
+            "iforest": {
+              "detected": 0.0,
+              "named": 0.0,
+              "median_delay_s": null,
+              "false_alarms_per_run": 0
+            }
+          }
+        },
+        {
+          "x": 0.75,
+          "params": {
+            "s": 0.75,
+            "variant": "speed"
+          },
+          "methods": {
+            "rules": {
+              "detected": 0.0,
+              "named": 0.0,
+              "median_delay_s": null,
+              "false_alarms_per_run": 0
+            },
+            "rf": {
+              "detected": 1.0,
+              "named": 1.0,
+              "median_delay_s": 54.0,
+              "false_alarms_per_run": 2
+            },
+            "cascade": {
+              "detected": 1.0,
+              "named": 1.0,
+              "median_delay_s": 54.0,
+              "false_alarms_per_run": 2
+            },
+            "rf_recorded": {
+              "detected": 0.0,
+              "named": 0.0,
+              "median_delay_s": null,
+              "false_alarms_per_run": 0
+            },
+            "cascade_recorded": {
+              "detected": 0.0,
+              "named": 0.0,
+              "median_delay_s": null,
+              "false_alarms_per_run": 0
+            },
+            "iforest": {
+              "detected": 0.0,
+              "named": 0.0,
+              "median_delay_s": null,
+              "false_alarms_per_run": 0
+            }
+          }
+        },
+        {
+          "x": 1.0,
+          "params": {
+            "s": 1.0,
+            "variant": "speed"
+          },
+          "methods": {
+            "rules": {
+              "detected": 0.125,
+              "named": 0.125,
+              "median_delay_s": 149,
+              "false_alarms_per_run": 0
+            },
+            "rf": {
+              "detected": 1.0,
+              "named": 1.0,
+              "median_delay_s": 54.0,
+              "false_alarms_per_run": 2
+            },
+            "cascade": {
+              "detected": 1.0,
+              "named": 1.0,
+              "median_delay_s": 54.0,
+              "false_alarms_per_run": 2
+            },
+            "rf_recorded": {
+              "detected": 0.0,
+              "named": 0.0,
+              "median_delay_s": null,
+              "false_alarms_per_run": 0
+            },
+            "cascade_recorded": {
+              "detected": 0.125,
+              "named": 0.125,
+              "median_delay_s": 149,
+              "false_alarms_per_run": 0
+            },
+            "iforest": {
+              "detected": 0.0,
+              "named": 0.0,
+              "median_delay_s": null,
+              "false_alarms_per_run": 0
+            }
+          }
+        }
+      ]
+    },
+    {
+      "attack": "DataManipulation",
+      "axis": "strength (position only)",
+      "key": "position",
+      "points": [
+        {
+          "x": 0.1,
+          "params": {
+            "s": 0.1,
+            "variant": "position"
+          },
+          "methods": {
+            "rules": {
+              "detected": 0.0,
+              "named": 0.0,
+              "median_delay_s": null,
+              "false_alarms_per_run": 0
+            },
+            "rf": {
+              "detected": 0.5,
+              "named": 0.5,
+              "median_delay_s": 90.0,
+              "false_alarms_per_run": 2
+            },
+            "cascade": {
+              "detected": 0.5,
+              "named": 0.5,
+              "median_delay_s": 90.0,
+              "false_alarms_per_run": 2
+            },
+            "rf_recorded": {
+              "detected": 0.0,
+              "named": 0.0,
+              "median_delay_s": null,
+              "false_alarms_per_run": 0
+            },
+            "cascade_recorded": {
+              "detected": 0.0,
+              "named": 0.0,
+              "median_delay_s": null,
+              "false_alarms_per_run": 0
+            },
+            "iforest": {
+              "detected": 0.0,
+              "named": 0.0,
+              "median_delay_s": null,
+              "false_alarms_per_run": 0
+            }
+          }
+        },
+        {
+          "x": 0.25,
+          "params": {
+            "s": 0.25,
+            "variant": "position"
+          },
+          "methods": {
+            "rules": {
+              "detected": 0.0,
+              "named": 0.0,
+              "median_delay_s": null,
+              "false_alarms_per_run": 0
+            },
+            "rf": {
+              "detected": 0.875,
+              "named": 0.875,
+              "median_delay_s": 102,
+              "false_alarms_per_run": 2
+            },
+            "cascade": {
+              "detected": 0.875,
+              "named": 0.875,
+              "median_delay_s": 102,
+              "false_alarms_per_run": 2
+            },
+            "rf_recorded": {
+              "detected": 0.0,
+              "named": 0.0,
+              "median_delay_s": null,
+              "false_alarms_per_run": 0
+            },
+            "cascade_recorded": {
+              "detected": 0.0,
+              "named": 0.0,
+              "median_delay_s": null,
+              "false_alarms_per_run": 0
+            },
+            "iforest": {
+              "detected": 0.0,
+              "named": 0.0,
+              "median_delay_s": null,
+              "false_alarms_per_run": 0
+            }
+          }
+        },
+        {
+          "x": 0.5,
+          "params": {
+            "s": 0.5,
+            "variant": "position"
+          },
+          "methods": {
+            "rules": {
+              "detected": 0.0,
+              "named": 0.0,
+              "median_delay_s": null,
+              "false_alarms_per_run": 0
+            },
+            "rf": {
+              "detected": 0.875,
+              "named": 0.875,
+              "median_delay_s": 102,
+              "false_alarms_per_run": 2
+            },
+            "cascade": {
+              "detected": 0.875,
+              "named": 0.875,
+              "median_delay_s": 102,
+              "false_alarms_per_run": 2
+            },
+            "rf_recorded": {
+              "detected": 0.0,
+              "named": 0.0,
+              "median_delay_s": null,
+              "false_alarms_per_run": 0
+            },
+            "cascade_recorded": {
+              "detected": 0.0,
+              "named": 0.0,
+              "median_delay_s": null,
+              "false_alarms_per_run": 0
+            },
+            "iforest": {
+              "detected": 0.0,
+              "named": 0.0,
+              "median_delay_s": null,
+              "false_alarms_per_run": 0
+            }
+          }
+        },
+        {
+          "x": 0.75,
+          "params": {
+            "s": 0.75,
+            "variant": "position"
+          },
+          "methods": {
+            "rules": {
+              "detected": 0.0,
+              "named": 0.0,
+              "median_delay_s": null,
+              "false_alarms_per_run": 0
+            },
+            "rf": {
+              "detected": 0.875,
+              "named": 0.875,
+              "median_delay_s": 102,
+              "false_alarms_per_run": 2
+            },
+            "cascade": {
+              "detected": 0.875,
+              "named": 0.875,
+              "median_delay_s": 102,
+              "false_alarms_per_run": 2
+            },
+            "rf_recorded": {
+              "detected": 0.0,
+              "named": 0.0,
+              "median_delay_s": null,
+              "false_alarms_per_run": 0
+            },
+            "cascade_recorded": {
+              "detected": 0.0,
+              "named": 0.0,
+              "median_delay_s": null,
+              "false_alarms_per_run": 0
+            },
+            "iforest": {
+              "detected": 0.0,
+              "named": 0.0,
+              "median_delay_s": null,
+              "false_alarms_per_run": 0
+            }
+          }
+        },
+        {
+          "x": 1.0,
+          "params": {
+            "s": 1.0,
+            "variant": "position"
+          },
+          "methods": {
+            "rules": {
+              "detected": 0.0,
+              "named": 0.0,
+              "median_delay_s": null,
+              "false_alarms_per_run": 0
+            },
+            "rf": {
+              "detected": 0.875,
+              "named": 0.875,
+              "median_delay_s": 102,
+              "false_alarms_per_run": 2
+            },
+            "cascade": {
+              "detected": 0.875,
+              "named": 0.875,
+              "median_delay_s": 102,
+              "false_alarms_per_run": 2
+            },
+            "rf_recorded": {
+              "detected": 0.0,
+              "named": 0.0,
+              "median_delay_s": null,
+              "false_alarms_per_run": 0
+            },
+            "cascade_recorded": {
+              "detected": 0.0,
+              "named": 0.0,
+              "median_delay_s": null,
+              "false_alarms_per_run": 0
+            },
+            "iforest": {
+              "detected": 0.0,
+              "named": 0.0,
+              "median_delay_s": null,
+              "false_alarms_per_run": 0
+            }
+          }
+        }
+      ]
+    },
+    {
+      "attack": "Sybil",
+      "axis": "ghosts, never answering",
+      "key": "ghosts",
+      "points": [
+        {
+          "x": 1,
+          "params": {
+            "ghosts": 1,
+            "answer": 0.0
+          },
+          "methods": {
+            "rules": {
+              "detected": 1.0,
+              "named": 1.0,
+              "median_delay_s": 2.5,
+              "false_alarms_per_run": 0
+            },
+            "rf": {
+              "detected": 1.0,
+              "named": 0.75,
+              "median_delay_s": 9.0,
+              "false_alarms_per_run": 2
+            },
+            "cascade": {
+              "detected": 1.0,
+              "named": 1.0,
+              "median_delay_s": 2.5,
+              "false_alarms_per_run": 2
+            },
+            "rf_recorded": {
+              "detected": 1.0,
+              "named": 0.0,
+              "median_delay_s": 11.5,
+              "false_alarms_per_run": 0
+            },
+            "cascade_recorded": {
+              "detected": 1.0,
+              "named": 1.0,
+              "median_delay_s": 2.5,
+              "false_alarms_per_run": 0
+            },
+            "iforest": {
+              "detected": 1.0,
+              "named": 1.0,
+              "median_delay_s": 50.0,
+              "false_alarms_per_run": 0
+            }
+          }
+        },
+        {
+          "x": 2,
+          "params": {
+            "ghosts": 2,
+            "answer": 0.0
+          },
+          "methods": {
+            "rules": {
+              "detected": 1.0,
+              "named": 1.0,
+              "median_delay_s": 2.5,
+              "false_alarms_per_run": 0
+            },
+            "rf": {
+              "detected": 1.0,
+              "named": 0.688,
+              "median_delay_s": 9.0,
+              "false_alarms_per_run": 2
+            },
+            "cascade": {
+              "detected": 1.0,
+              "named": 1.0,
+              "median_delay_s": 2.5,
+              "false_alarms_per_run": 2
+            },
+            "rf_recorded": {
+              "detected": 1.0,
+              "named": 0.0,
+              "median_delay_s": 11.0,
+              "false_alarms_per_run": 0
+            },
+            "cascade_recorded": {
+              "detected": 1.0,
+              "named": 1.0,
+              "median_delay_s": 2.5,
+              "false_alarms_per_run": 0
+            },
+            "iforest": {
+              "detected": 1.0,
+              "named": 1.0,
+              "median_delay_s": 41.5,
+              "false_alarms_per_run": 0
+            }
+          }
+        },
+        {
+          "x": 5,
+          "params": {
+            "ghosts": 5,
+            "answer": 0.0
+          },
+          "methods": {
+            "rules": {
+              "detected": 1.0,
+              "named": 1.0,
+              "median_delay_s": 3.0,
+              "false_alarms_per_run": 0
+            },
+            "rf": {
+              "detected": 1.0,
+              "named": 0.725,
+              "median_delay_s": 9.0,
+              "false_alarms_per_run": 2
+            },
+            "cascade": {
+              "detected": 1.0,
+              "named": 0.975,
+              "median_delay_s": 3.0,
+              "false_alarms_per_run": 2
+            },
+            "rf_recorded": {
+              "detected": 1.0,
+              "named": 0.0,
+              "median_delay_s": 11.0,
+              "false_alarms_per_run": 0
+            },
+            "cascade_recorded": {
+              "detected": 1.0,
+              "named": 1.0,
+              "median_delay_s": 3.0,
+              "false_alarms_per_run": 0
+            },
+            "iforest": {
+              "detected": 1.0,
+              "named": 1.0,
+              "median_delay_s": 48.0,
+              "false_alarms_per_run": 0
+            }
+          }
+        },
+        {
+          "x": 10,
+          "params": {
+            "ghosts": 10,
+            "answer": 0.0
+          },
+          "methods": {
+            "rules": {
+              "detected": 1.0,
+              "named": 1.0,
+              "median_delay_s": 3.0,
+              "false_alarms_per_run": 0
+            },
+            "rf": {
+              "detected": 1.0,
+              "named": 0.625,
+              "median_delay_s": 9.0,
+              "false_alarms_per_run": 2
+            },
+            "cascade": {
+              "detected": 1.0,
+              "named": 0.912,
+              "median_delay_s": 3.0,
+              "false_alarms_per_run": 2
+            },
+            "rf_recorded": {
+              "detected": 1.0,
+              "named": 0.0,
+              "median_delay_s": 11.0,
+              "false_alarms_per_run": 0
+            },
+            "cascade_recorded": {
+              "detected": 1.0,
+              "named": 0.912,
+              "median_delay_s": 3.0,
+              "false_alarms_per_run": 0
+            },
+            "iforest": {
+              "detected": 1.0,
+              "named": 1.0,
+              "median_delay_s": 48.0,
+              "false_alarms_per_run": 0
+            }
+          }
+        }
+      ]
+    },
+    {
+      "attack": "Sybil",
+      "axis": "share answered, 5 ghosts",
+      "key": "answer",
+      "points": [
+        {
+          "x": 0.0,
+          "params": {
+            "ghosts": 5,
+            "answer": 0.0
+          },
+          "methods": {
+            "rules": {
+              "detected": 1.0,
+              "named": 1.0,
+              "median_delay_s": 3.0,
+              "false_alarms_per_run": 0
+            },
+            "rf": {
+              "detected": 1.0,
+              "named": 0.725,
+              "median_delay_s": 9.0,
+              "false_alarms_per_run": 2
+            },
+            "cascade": {
+              "detected": 1.0,
+              "named": 0.975,
+              "median_delay_s": 3.0,
+              "false_alarms_per_run": 2
+            },
+            "rf_recorded": {
+              "detected": 1.0,
+              "named": 0.0,
+              "median_delay_s": 11.0,
+              "false_alarms_per_run": 0
+            },
+            "cascade_recorded": {
+              "detected": 1.0,
+              "named": 1.0,
+              "median_delay_s": 3.0,
+              "false_alarms_per_run": 0
+            },
+            "iforest": {
+              "detected": 1.0,
+              "named": 1.0,
+              "median_delay_s": 48.0,
+              "false_alarms_per_run": 0
+            }
+          }
+        },
+        {
+          "x": 0.1,
+          "params": {
+            "ghosts": 5,
+            "answer": 0.1
+          },
+          "methods": {
+            "rules": {
+              "detected": 0.425,
+              "named": 0.425,
+              "median_delay_s": 3,
+              "false_alarms_per_run": 0
+            },
+            "rf": {
+              "detected": 1.0,
+              "named": 0.825,
+              "median_delay_s": 11.5,
+              "false_alarms_per_run": 2
+            },
+            "cascade": {
+              "detected": 1.0,
+              "named": 0.95,
+              "median_delay_s": 7.5,
+              "false_alarms_per_run": 2
+            },
+            "rf_recorded": {
+              "detected": 0.7,
+              "named": 0.0,
+              "median_delay_s": 80.0,
+              "false_alarms_per_run": 0
+            },
+            "cascade_recorded": {
+              "detected": 0.8,
+              "named": 0.4,
+              "median_delay_s": 38.5,
+              "false_alarms_per_run": 0
+            },
+            "iforest": {
+              "detected": 0.125,
+              "named": 0.125,
+              "median_delay_s": 140,
+              "false_alarms_per_run": 0
+            }
+          }
+        },
+        {
+          "x": 0.3,
+          "params": {
+            "ghosts": 5,
+            "answer": 0.3
+          },
+          "methods": {
+            "rules": {
+              "detected": 0.225,
+              "named": 0.2,
+              "median_delay_s": 4,
+              "false_alarms_per_run": 0
+            },
+            "rf": {
+              "detected": 1.0,
+              "named": 0.95,
+              "median_delay_s": 11.0,
+              "false_alarms_per_run": 2
+            },
+            "cascade": {
+              "detected": 1.0,
+              "named": 0.95,
+              "median_delay_s": 9.0,
+              "false_alarms_per_run": 2
+            },
+            "rf_recorded": {
+              "detected": 0.075,
+              "named": 0.0,
+              "median_delay_s": 186,
+              "false_alarms_per_run": 0
+            },
+            "cascade_recorded": {
+              "detected": 0.275,
+              "named": 0.2,
+              "median_delay_s": 5,
+              "false_alarms_per_run": 0
+            },
+            "iforest": {
+              "detected": 0.0,
+              "named": 0.0,
+              "median_delay_s": null,
+              "false_alarms_per_run": 0
+            }
+          }
+        },
+        {
+          "x": 0.6,
+          "params": {
+            "ghosts": 5,
+            "answer": 0.6
+          },
+          "methods": {
+            "rules": {
+              "detected": 0.025,
+              "named": 0.0,
+              "median_delay_s": 35,
+              "false_alarms_per_run": 0
+            },
+            "rf": {
+              "detected": 1.0,
+              "named": 0.9,
+              "median_delay_s": 12.0,
+              "false_alarms_per_run": 2
+            },
+            "cascade": {
+              "detected": 1.0,
+              "named": 0.9,
+              "median_delay_s": 12.0,
+              "false_alarms_per_run": 2
+            },
+            "rf_recorded": {
+              "detected": 0.0,
+              "named": 0.0,
+              "median_delay_s": null,
+              "false_alarms_per_run": 0
+            },
+            "cascade_recorded": {
+              "detected": 0.025,
+              "named": 0.0,
+              "median_delay_s": 35,
+              "false_alarms_per_run": 0
+            },
+            "iforest": {
+              "detected": 0.0,
+              "named": 0.0,
+              "median_delay_s": null,
+              "false_alarms_per_run": 0
+            }
+          }
+        }
+      ]
+    },
+    {
+      "attack": "CriticalNode",
+      "axis": "replies suppressed, busy target",
+      "key": "q_busy",
+      "points": [
+        {
+          "x": 0.25,
+          "params": {
+            "q": 0.25
+          },
+          "methods": {
+            "rules": {
+              "detected": 0.0,
+              "named": 0.0,
+              "median_delay_s": null,
+              "false_alarms_per_run": 0
+            },
+            "rf": {
+              "detected": 0.75,
+              "named": 0.0,
+              "median_delay_s": 129.0,
+              "false_alarms_per_run": 2
+            },
+            "cascade": {
+              "detected": 0.75,
+              "named": 0.0,
+              "median_delay_s": 129.0,
+              "false_alarms_per_run": 2
+            },
+            "rf_recorded": {
+              "detected": 0.0,
+              "named": 0.0,
+              "median_delay_s": null,
+              "false_alarms_per_run": 0
+            },
+            "cascade_recorded": {
+              "detected": 0.0,
+              "named": 0.0,
+              "median_delay_s": null,
+              "false_alarms_per_run": 0
+            },
+            "iforest": {
+              "detected": 0.0,
+              "named": 0.0,
+              "median_delay_s": null,
+              "false_alarms_per_run": 0
+            }
+          }
+        },
+        {
+          "x": 0.5,
+          "params": {
+            "q": 0.5
+          },
+          "methods": {
+            "rules": {
+              "detected": 0.0,
+              "named": 0.0,
+              "median_delay_s": null,
+              "false_alarms_per_run": 0
+            },
+            "rf": {
+              "detected": 0.875,
+              "named": 0.0,
+              "median_delay_s": 126,
+              "false_alarms_per_run": 2
+            },
+            "cascade": {
+              "detected": 0.875,
+              "named": 0.0,
+              "median_delay_s": 126,
+              "false_alarms_per_run": 2
+            },
+            "rf_recorded": {
+              "detected": 0.0,
+              "named": 0.0,
+              "median_delay_s": null,
+              "false_alarms_per_run": 0
+            },
+            "cascade_recorded": {
+              "detected": 0.0,
+              "named": 0.0,
+              "median_delay_s": null,
+              "false_alarms_per_run": 0
+            },
+            "iforest": {
+              "detected": 0.0,
+              "named": 0.0,
+              "median_delay_s": null,
+              "false_alarms_per_run": 0
+            }
+          }
+        },
+        {
+          "x": 0.75,
+          "params": {
+            "q": 0.75
+          },
+          "methods": {
+            "rules": {
+              "detected": 0.0,
+              "named": 0.0,
+              "median_delay_s": null,
+              "false_alarms_per_run": 0
+            },
+            "rf": {
+              "detected": 1.0,
+              "named": 0.375,
+              "median_delay_s": 126.5,
+              "false_alarms_per_run": 2
+            },
+            "cascade": {
+              "detected": 1.0,
+              "named": 0.375,
+              "median_delay_s": 126.5,
+              "false_alarms_per_run": 2
+            },
+            "rf_recorded": {
+              "detected": 0.25,
+              "named": 0.0,
+              "median_delay_s": 203.5,
+              "false_alarms_per_run": 0
+            },
+            "cascade_recorded": {
+              "detected": 0.25,
+              "named": 0.0,
+              "median_delay_s": 203.5,
+              "false_alarms_per_run": 0
+            },
+            "iforest": {
+              "detected": 0.0,
+              "named": 0.0,
+              "median_delay_s": null,
+              "false_alarms_per_run": 0
+            }
+          }
+        },
+        {
+          "x": 0.9,
+          "params": {
+            "q": 0.9
+          },
+          "methods": {
+            "rules": {
+              "detected": 0.0,
+              "named": 0.0,
+              "median_delay_s": null,
+              "false_alarms_per_run": 0
+            },
+            "rf": {
+              "detected": 1.0,
+              "named": 0.125,
+              "median_delay_s": 124.5,
+              "false_alarms_per_run": 2
+            },
+            "cascade": {
+              "detected": 1.0,
+              "named": 0.125,
+              "median_delay_s": 124.5,
+              "false_alarms_per_run": 2
+            },
+            "rf_recorded": {
+              "detected": 0.875,
+              "named": 0.0,
+              "median_delay_s": 146,
+              "false_alarms_per_run": 0
+            },
+            "cascade_recorded": {
+              "detected": 0.875,
+              "named": 0.0,
+              "median_delay_s": 146,
+              "false_alarms_per_run": 0
+            },
+            "iforest": {
+              "detected": 0.375,
+              "named": 0.375,
+              "median_delay_s": 177,
+              "false_alarms_per_run": 0
+            }
+          }
+        },
+        {
+          "x": 1.0,
+          "params": {
+            "q": 1.0
+          },
+          "methods": {
+            "rules": {
+              "detected": 0.0,
+              "named": 0.0,
+              "median_delay_s": null,
+              "false_alarms_per_run": 0
+            },
+            "rf": {
+              "detected": 1.0,
+              "named": 0.0,
+              "median_delay_s": 112.5,
+              "false_alarms_per_run": 2
+            },
+            "cascade": {
+              "detected": 1.0,
+              "named": 0.0,
+              "median_delay_s": 112.5,
+              "false_alarms_per_run": 2
+            },
+            "rf_recorded": {
+              "detected": 1.0,
+              "named": 0.0,
+              "median_delay_s": 126.5,
+              "false_alarms_per_run": 0
+            },
+            "cascade_recorded": {
+              "detected": 1.0,
+              "named": 0.0,
+              "median_delay_s": 126.5,
+              "false_alarms_per_run": 0
+            },
+            "iforest": {
+              "detected": 1.0,
+              "named": 1.0,
+              "median_delay_s": 116.5,
+              "false_alarms_per_run": 0
+            }
+          }
+        }
+      ]
+    },
+    {
+      "attack": "MITM",
+      "axis": "loss, delay 1.5 s, busy target",
+      "key": "loss_busy",
+      "points": [
+        {
+          "x": 0.05,
+          "params": {
+            "loss": 0.05,
+            "delay": 1.5
+          },
+          "methods": {
+            "rules": {
+              "detected": 0.0,
+              "named": 0.0,
+              "median_delay_s": null,
+              "false_alarms_per_run": 0
+            },
+            "rf": {
+              "detected": 0.75,
+              "named": 0.75,
+              "median_delay_s": 124.5,
+              "false_alarms_per_run": 2
+            },
+            "cascade": {
+              "detected": 0.75,
+              "named": 0.75,
+              "median_delay_s": 124.5,
+              "false_alarms_per_run": 2
+            },
+            "rf_recorded": {
+              "detected": 0.0,
+              "named": 0.0,
+              "median_delay_s": null,
+              "false_alarms_per_run": 0
+            },
+            "cascade_recorded": {
+              "detected": 0.0,
+              "named": 0.0,
+              "median_delay_s": null,
+              "false_alarms_per_run": 0
+            },
+            "iforest": {
+              "detected": 0.0,
+              "named": 0.0,
+              "median_delay_s": null,
+              "false_alarms_per_run": 0
+            }
+          }
+        },
+        {
+          "x": 0.1,
+          "params": {
+            "loss": 0.1,
+            "delay": 1.5
+          },
+          "methods": {
+            "rules": {
+              "detected": 0.0,
+              "named": 0.0,
+              "median_delay_s": null,
+              "false_alarms_per_run": 0
+            },
+            "rf": {
+              "detected": 0.875,
+              "named": 0.875,
+              "median_delay_s": 126,
+              "false_alarms_per_run": 2
+            },
+            "cascade": {
+              "detected": 0.875,
+              "named": 0.875,
+              "median_delay_s": 126,
+              "false_alarms_per_run": 2
+            },
+            "rf_recorded": {
+              "detected": 0.0,
+              "named": 0.0,
+              "median_delay_s": null,
+              "false_alarms_per_run": 0
+            },
+            "cascade_recorded": {
+              "detected": 0.0,
+              "named": 0.0,
+              "median_delay_s": null,
+              "false_alarms_per_run": 0
+            },
+            "iforest": {
+              "detected": 0.0,
+              "named": 0.0,
+              "median_delay_s": null,
+              "false_alarms_per_run": 0
+            }
+          }
+        },
+        {
+          "x": 0.2,
+          "params": {
+            "loss": 0.2,
+            "delay": 1.5
+          },
+          "methods": {
+            "rules": {
+              "detected": 0.0,
+              "named": 0.0,
+              "median_delay_s": null,
+              "false_alarms_per_run": 0
+            },
+            "rf": {
+              "detected": 1.0,
+              "named": 1.0,
+              "median_delay_s": 126.5,
+              "false_alarms_per_run": 2
+            },
+            "cascade": {
+              "detected": 1.0,
+              "named": 1.0,
+              "median_delay_s": 126.5,
+              "false_alarms_per_run": 2
+            },
+            "rf_recorded": {
+              "detected": 0.0,
+              "named": 0.0,
+              "median_delay_s": null,
+              "false_alarms_per_run": 0
+            },
+            "cascade_recorded": {
+              "detected": 0.0,
+              "named": 0.0,
+              "median_delay_s": null,
+              "false_alarms_per_run": 0
+            },
+            "iforest": {
+              "detected": 0.0,
+              "named": 0.0,
+              "median_delay_s": null,
+              "false_alarms_per_run": 0
+            }
+          }
+        },
+        {
+          "x": 0.4,
+          "params": {
+            "loss": 0.4,
+            "delay": 1.5
+          },
+          "methods": {
+            "rules": {
+              "detected": 0.0,
+              "named": 0.0,
+              "median_delay_s": null,
+              "false_alarms_per_run": 0
+            },
+            "rf": {
+              "detected": 1.0,
+              "named": 0.875,
+              "median_delay_s": 126.5,
+              "false_alarms_per_run": 2
+            },
+            "cascade": {
+              "detected": 1.0,
+              "named": 0.875,
+              "median_delay_s": 126.5,
+              "false_alarms_per_run": 2
+            },
+            "rf_recorded": {
+              "detected": 0.0,
+              "named": 0.0,
+              "median_delay_s": null,
+              "false_alarms_per_run": 0
+            },
+            "cascade_recorded": {
+              "detected": 0.0,
+              "named": 0.0,
+              "median_delay_s": null,
+              "false_alarms_per_run": 0
+            },
+            "iforest": {
+              "detected": 0.0,
+              "named": 0.0,
+              "median_delay_s": null,
+              "false_alarms_per_run": 0
+            }
+          }
+        },
+        {
+          "x": 0.6,
+          "params": {
+            "loss": 0.6,
+            "delay": 1.5
+          },
+          "methods": {
+            "rules": {
+              "detected": 0.0,
+              "named": 0.0,
+              "median_delay_s": null,
+              "false_alarms_per_run": 0
+            },
+            "rf": {
+              "detected": 1.0,
+              "named": 0.125,
+              "median_delay_s": 126.5,
+              "false_alarms_per_run": 2
+            },
+            "cascade": {
+              "detected": 1.0,
+              "named": 0.125,
+              "median_delay_s": 126.5,
+              "false_alarms_per_run": 2
+            },
+            "rf_recorded": {
+              "detected": 0.125,
+              "named": 0.125,
+              "median_delay_s": 130,
+              "false_alarms_per_run": 0
+            },
+            "cascade_recorded": {
+              "detected": 0.125,
+              "named": 0.125,
+              "median_delay_s": 130,
+              "false_alarms_per_run": 0
+            },
+            "iforest": {
+              "detected": 0.0,
+              "named": 0.0,
+              "median_delay_s": null,
+              "false_alarms_per_run": 0
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "null_control": {
+    "rules": {
+      "detected": 0.0,
+      "named": 0.0,
+      "median_delay_s": null,
+      "false_alarms_per_run": 0
+    },
+    "rf": {
+      "detected": 0.0,
+      "named": 0.0,
+      "median_delay_s": null,
+      "false_alarms_per_run": 2
+    },
+    "cascade": {
+      "detected": 0.0,
+      "named": 0.0,
+      "median_delay_s": null,
+      "false_alarms_per_run": 2
+    },
+    "rf_recorded": {
+      "detected": 0.0,
+      "named": 0.0,
+      "median_delay_s": null,
+      "false_alarms_per_run": 0
+    },
+    "cascade_recorded": {
+      "detected": 0.0,
+      "named": 0.0,
+      "median_delay_s": null,
+      "false_alarms_per_run": 0
+    },
+    "iforest": {
+      "detected": 0.0,
+      "named": 0.0,
+      "median_delay_s": null,
+      "false_alarms_per_run": 0
+    }
+  },
+  "dm_run1_run2": {
+    "DataManipulation->DataManipulation2": {
+      "rules": {
+        "accuracy": 1.0,
+        "dm_precision": 1.0,
+        "dm_recall": 1.0,
+        "dm_f1": 1.0,
+        "dm_windows": 9,
+        "victim_windows_named_dm": 9,
+        "honest_windows_flagged": 0
+      },
+      "ml": {
+        "accuracy": 0.9953,
+        "dm_precision": 0.9,
+        "dm_recall": 1.0,
+        "dm_f1": 0.9474,
+        "dm_windows": 9,
+        "victim_windows_named_dm": 9,
+        "honest_windows_flagged": 1
+      },
+      "cascade": {
+        "accuracy": 0.9953,
+        "dm_precision": 0.9,
+        "dm_recall": 1.0,
+        "dm_f1": 0.9474,
+        "dm_windows": 9,
+        "victim_windows_named_dm": 9,
+        "honest_windows_flagged": 1
+      }
+    },
+    "DataManipulation2->DataManipulation": {
+      "rules": {
+        "accuracy": 1.0,
+        "dm_precision": 1.0,
+        "dm_recall": 1.0,
+        "dm_f1": 1.0,
+        "dm_windows": 5,
+        "victim_windows_named_dm": 5,
+        "honest_windows_flagged": 0
+      },
+      "ml": {
+        "accuracy": 0.9921,
+        "dm_precision": 1.0,
+        "dm_recall": 0.6,
+        "dm_f1": 0.75,
+        "dm_windows": 5,
+        "victim_windows_named_dm": 3,
+        "honest_windows_flagged": 0
+      },
+      "cascade": {
+        "accuracy": 1.0,
+        "dm_precision": 1.0,
+        "dm_recall": 1.0,
+        "dm_f1": 1.0,
+        "dm_windows": 5,
+        "victim_windows_named_dm": 5,
+        "honest_windows_flagged": 0
+      }
+    }
+  },
+  "plots": [
+    "docs/injection/injection_MITM.png",
+    "docs/injection/injection_CriticalNode.png",
+    "docs/injection/injection_DataManipulation.png",
+    "docs/injection/injection_Sybil.png"
+  ],
+  "runtime_s": 174.9
+}
