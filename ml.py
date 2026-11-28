@@ -10,7 +10,12 @@ Two models score every drone once per 15-second window, live:
                     window looks unlike anything in normal operation.
   Random Forest     trustworthiness classification. Supervised, trained on
                     labelled windows from the recorded attack sessions.
-                    Outputs P(compromised) for the drone.
+                    Multiclass: normal or the attack type (Critical Node,
+                    data manipulation, MITM, Sybil). P(compromised) is
+                    1 - P(normal); the alert names the most likely type.
+
+Both run only on drones that no rule has flagged (detect.py is the gate):
+the rules are the cheap first stage, the models the second.
 
 WHY WINDOWS ARE KEYED BY THE EVALUATED DRONE
 --------------------------------------------
@@ -221,6 +226,24 @@ class SubjectWindower:
 # ---------------------------------------------------------------------
 # labels -- evaluation only, from ground truth, never a feature
 # ---------------------------------------------------------------------
+NORMAL = "normal"
+ATTACK_CLASSES = ["CriticalNode", "DataManipulation", "MITM", "Sybil"]
+CLASSES = [NORMAL] + ATTACK_CLASSES
+
+
+def session_class(attack: str) -> str:
+    """Session key -> attack class: 'DataManipulation2' -> 'DataManipulation'."""
+    name = attack.rstrip("0123456789")
+    if name not in ATTACK_CLASSES:
+        raise ValueError(f"unknown attack session {attack!r}")
+    return name
+
+
+def window_class(window: "Window", binary_label: int, attack: str) -> str:
+    """The multiclass label: the session's attack type if compromised."""
+    return session_class(attack) if binary_label else NORMAL
+
+
 def label(window: Window, victim: str | None, attack_type: str | None) -> int:
     """
     1 if the telemetry about this drone in this window is compromised:
@@ -264,7 +287,16 @@ def session_windows(attack: str, baseline=None,
         attack_type = gt["attack_type"] or attack_type
         pipe.handle(msg)
     pipe.finish()
-    return [(w, label(w, victim, attack_type)) for w in pipe.windows]
+    out = []
+    for w in pipe.windows:
+        lab = label(w, victim, attack_type)
+        w.meta["cls"] = window_class(w, lab, attack)
+        # what the rule stage had said about this drone by the window's end:
+        # the cascade's first stage, replayed for evaluation
+        hit = pipe.rule_hits.get(w.subject)
+        w.meta["rule"] = hit[1] if hit and hit[2] <= w.end else None
+        out.append((w, lab))
+    return out
 
 
 # ---------------------------------------------------------------------
@@ -291,6 +323,12 @@ class MLScorer:
         self.rf = b["rf"]
         if hasattr(self.rf, "n_jobs"):
             self.rf.n_jobs = 1        # ~54 rows per batch: threads cost more than they save
+        # multiclass: classes_ holds "normal" plus attack names. A binary
+        # model from before (classes 0/1) still loads: class 1 = compromised.
+        classes = list(getattr(self.rf, "classes_", [0, 1]))
+        self.classes = [str(c) for c in classes]
+        self._normal = (classes.index(NORMAL) if NORMAL in classes
+                        else classes.index(0))
         self.rf_threshold: float = b["rf_threshold"]
         self.info: dict = b.get("info", {})
         self.if_persist: int = b.get("if_persist", 2)
@@ -303,26 +341,40 @@ class MLScorer:
         """One batched call per model: windows close together at each
         15 s boundary, and per-row sklearn calls would cost ~100x more."""
         import numpy as np
+        anomaly, proba = self.score_full(windows)
+        return anomaly, 1.0 - proba[:, self._normal]
+
+    def score_full(self, windows: list[Window]):
+        """Anomaly scores and the classifier's full class-probability matrix."""
+        import numpy as np
         X = np.array([[w.features[n] for n in self.names] for w in windows],
                      dtype=float)
-        return -self.iforest.score_samples(X), self.rf.predict_proba(X)[:, 1]
+        return -self.iforest.score_samples(X), self.rf.predict_proba(X)
+
+    def attack_type(self, proba_row) -> str:
+        """The most likely attack class (never 'normal')."""
+        best = max((p, c) for i, (p, c) in enumerate(zip(proba_row, self.classes))
+                   if i != self._normal)
+        return best[1] if best[1] not in ("1", "True") else "unknown"
 
     def verdicts(self, windows: list[Window]) -> list[dict]:
         windows = [w for w in windows if w.features["n_requests"] > 0]
         if not windows:     # only its own activity: nothing to evaluate
             return []
         self.windows_scored += len(windows)
-        anomalies, probs = self.score_many(windows)
+        anomalies, proba = self.score_full(windows)
         out = []
-        for w, anomaly, p_bad in zip(windows, anomalies, probs):
-            anomaly, p_bad = float(anomaly), float(p_bad)
+        for w, anomaly, row in zip(windows, anomalies, proba):
+            anomaly, p_bad = float(anomaly), 1.0 - float(row[self._normal])
+            kind = self.attack_type(row)
             base = {"drone": w.subject, "t_session": w.end,
                     "window_start": w.start, "onset": w.onset,
                     "detection_delay_s": (w.end - w.onset)
                     if w.onset is not None else None,
                     "anomaly_score": round(anomaly, 4),
                     "anomaly_threshold": round(self.if_threshold, 4),
-                    "p_compromised": round(p_bad, 4)}
+                    "p_compromised": round(p_bad, 4),
+                    "attack_type": kind, "stage": "ml"}
             # every window's scores, so the dashboard can show a live ML
             # reading for every drone -- not only for the alerted ones
             out.append({**base, "verdict": "SCORE", "track": "B",
@@ -333,7 +385,7 @@ class MLScorer:
             if p_bad >= self.rf_threshold and w.subject not in self.flagged_rf:
                 self.flagged_rf.add(w.subject)
                 out.append({**base, "verdict": "ML_COMPROMISED", "track": "B-RF",
-                            "reason": _explain_rf(w, p_bad)})
+                            "reason": _explain_rf(w, p_bad, kind)})
             # anomaly alert needs `if_persist` consecutive anomalous windows:
             # a single odd window is common in a disturbed swarm (see
             # results_ml.json), a persistent one is worth an operator's look
@@ -345,7 +397,8 @@ class MLScorer:
             self._if_run[w.subject] = (w.start, run)
             if run >= self.if_persist and w.subject not in self.flagged_if:
                 self.flagged_if.add(w.subject)
-                out.append({**base, "verdict": "ANOMALY", "track": "B-IF",
+                out.append({**base, "attack_type": None,
+                            "verdict": "ANOMALY", "track": "B-IF",
                             "reason": _explain_if(w, anomaly, self.if_threshold)})
         return out
 
@@ -361,8 +414,9 @@ def _evidence(f: dict) -> str:
     return ", ".join(bits)
 
 
-def _explain_rf(w: Window, p: float) -> str:
-    return (f"classifier: P(compromised) = {p:.2f} for window "
+def _explain_rf(w: Window, p: float, kind: str = "") -> str:
+    kind = f", most likely {kind}" if kind else ""
+    return (f"classifier: P(compromised) = {p:.2f}{kind} for window "
             f"{w.start}-{w.end}s ({_evidence(w.features)})")
 
 

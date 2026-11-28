@@ -14,9 +14,12 @@ Writes  uav.action     what happened to each drone -- the topic a fleet
 POLICY (one line per signal, deliberately conservative)
 ------------------------------------------------------
   rule alert        ISOLATE automatically after a grace period (default
-                    10 s). The rule had zero false alarms on every recorded
-                    session and on the held-out clean recording, so acting
-                    on it alone is defensible.
+                    10 s). Each of the four rules had zero false alarms on
+                    every recorded session and on the held-out clean
+                    recording, so acting on them alone is defensible -- with
+                    the caveat in rules.py that the MITM rule's thresholds
+                    are the least robust. The grace period is the operator's
+                    chance to hold a wrong isolation.
   classifier alert  AWAITING_OPERATOR: shown, never acted on automatically.
                     It is accurate on attack types it was trained on but can
                     miss or over-call types it has not seen (results_ml.json).

@@ -5,7 +5,8 @@ Trains the two live Track B models, evaluates them honestly, and writes the
 deployable bundle models/ml.joblib that detect.py --ml loads.
 
   Isolation Forest  anomaly detection, fitted on clean baseline windows only
-  Random Forest     trustworthiness classification, supervised
+  Random Forest     trustworthiness classification, supervised, multiclass:
+                    normal / CriticalNode / DataManipulation / MITM / Sybil
 
 All windows come from ml.session_windows(), i.e. from the live Pipeline
 itself, so what is evaluated here is exactly what runs on the stream.
@@ -37,6 +38,33 @@ Splits, each chosen so nothing tested was seen in training:
 The window straddling the attack onset mixes clean and attack traffic and is
 left out of training and window-level scoring.
 
+THE CASCADE: RULES vs ML vs RULES-THEN-ML (results_ml.json "cascade")
+---------------------------------------------------------------------
+Can the pipeline name the attack, and what does each stage contribute?
+Three predictors label every (drone, 15 s window) as normal or an attack type:
+
+  rules only     the rule that had flagged the drone by the window's end
+  ML only        the multiclass Random Forest
+  cascade        the rule's label if a rule fired, else the Random Forest's
+
+Known attack types -- blocked cross-validation over time: every attack
+session's post-onset windows are cut into --folds contiguous time blocks;
+each block is predicted by a forest trained on the clean baseline plus the
+OTHER blocks of every session. Contiguous blocks, not shuffled windows, so
+neighbouring (near-identical) windows do not leak between train and test.
+The held-out clean recording is predicted by a forest trained on everything.
+Accuracy, per-class precision/recall/F1, macro F1, a multiclass confusion
+matrix, and a 2x2 confusion matrix per attack session.
+
+Unseen attack types -- leave-one-attack-out again, now for all three
+predictors (attack vs normal): a forest cannot name a type it never saw,
+but the rules need no training data, so this is where the cascade helps.
+
+Caveats, stated in results_ml.json too: there are very few attacked windows
+(Critical Node 6, data manipulation 14, MITM 19, Sybil 120), and the rule
+thresholds were chosen by looking at these same recordings (rules.py says
+how, per rule). The rules' numbers are therefore optimistic.
+
 THE DEPLOYED MODEL
 ------------------
 The Random Forest in models/ml.joblib is trained on every session EXCEPT
@@ -61,7 +89,8 @@ from pathlib import Path
 
 import numpy as np
 from sklearn.ensemble import IsolationForest, RandomForestClassifier
-from sklearn.metrics import precision_recall_fscore_support, roc_auc_score
+from sklearn.metrics import (accuracy_score, confusion_matrix,
+                             precision_recall_fscore_support, roc_auc_score)
 
 import config as C
 import ml as M
@@ -104,6 +133,16 @@ def _y(ws):
     return np.array([l for _, l in ws])
 
 
+def _yc(ws):
+    """Multiclass labels: 'normal' or the attack type (ml.window_class)."""
+    return np.array([w.meta["cls"] for w, _ in ws])
+
+
+def _p_attack(rf, X):
+    """P(compromised) = 1 - P(normal), whatever attack classes the forest knows."""
+    return 1.0 - rf.predict_proba(X)[:, list(rf.classes_).index(M.NORMAL)]
+
+
 def fit_iforest(base, names, alpha, seed):
     t0 = time.monotonic()
     clf = IsolationForest(n_estimators=IF_TREES, random_state=seed).fit(_X(base, names))
@@ -116,7 +155,7 @@ def fit_rf(rows, names, seed):
     t0 = time.monotonic()
     rf = RandomForestClassifier(n_estimators=RF_TREES, class_weight="balanced",
                                 min_samples_leaf=2, random_state=seed,
-                                n_jobs=-1).fit(_X(rows, names), _y(rows))
+                                n_jobs=-1).fit(_X(rows, names), _yc(rows))
     return rf, time.monotonic() - t0
 
 
@@ -213,10 +252,10 @@ def evaluate(data, names, args) -> dict:
         mets, held_fp = [], []
         for seed in range(args.seeds):
             rf, _ = fit_rf(train, names, seed)
-            mets.append(window_metrics(_y(P), rf.predict_proba(_X(P, names))[:, 1],
+            mets.append(window_metrics(_y(P), _p_attack(rf, _X(P, names)),
                                        args.rf_threshold))
             held_fp.append(float(np.mean(
-                rf.predict_proba(_X(held, names))[:, 1] >= args.rf_threshold)))
+                _p_attack(rf, _X(held, names)) >= args.rf_threshold)))
         rf, _ = fit_rf(train, names, 0)
         b = _bundle(names, clf, float("inf"), rf, args.rf_threshold, args.persist)
         out["rf_leave_one_attack_out"][a] = {
@@ -231,7 +270,7 @@ def evaluate(data, names, args) -> dict:
     mets = []
     for seed in range(args.seeds):
         rf, _ = fit_rf(train, names, seed)
-        mets.append(window_metrics(_y(P), rf.predict_proba(_X(P, names))[:, 1],
+        mets.append(window_metrics(_y(P), _p_attack(rf, _X(P, names)),
                                    args.rf_threshold))
     rf, _ = fit_rf(train, names, 0)
     b = _bundle(names, clf, float("inf"), rf, args.rf_threshold, args.persist)
@@ -241,6 +280,176 @@ def evaluate(data, names, args) -> dict:
                              b, "B-RF"),
     }
     return out
+
+
+# ---------------------------------------------------------------------
+# the cascade: rules only vs ML only vs rules then ML
+# ---------------------------------------------------------------------
+METHODS = ("rules", "ml", "cascade")
+
+
+def _ml_labels(rf, X, thr):
+    """Forest -> label per window: 'normal' unless P(compromised) >= thr, then
+    the most likely attack class (what MLScorer alerts with)."""
+    proba = rf.predict_proba(X)
+    classes = list(rf.classes_)
+    k = classes.index(M.NORMAL)
+    out = []
+    for row in proba:
+        if 1.0 - row[k] < thr:
+            out.append(M.NORMAL)
+        else:
+            out.append(max((p, c) for i, (p, c) in enumerate(zip(row, classes))
+                           if i != k)[1])
+    return np.array(out)
+
+
+def _three_way(ws, ml_pred):
+    rules = np.array([w.meta["rule"] or M.NORMAL for w, _ in ws])
+    cascade = np.where(rules != M.NORMAL, rules, ml_pred)
+    return {"rules": rules, "ml": np.asarray(ml_pred), "cascade": cascade}
+
+
+def multiclass_metrics(y, pred) -> dict:
+    labels = M.CLASSES
+    p, r, f, sup = precision_recall_fscore_support(y, pred, labels=labels,
+                                                   zero_division=0)
+    yb, pb = y != M.NORMAL, pred != M.NORMAL
+    bp, br, bf, _ = precision_recall_fscore_support(yb, pb, average="binary",
+                                                    zero_division=0)
+    present = [c for c in labels if (y == c).any()]
+    _, _, f_macro, _ = precision_recall_fscore_support(
+        y, pred, labels=present, average="macro", zero_division=0)
+    return {
+        "accuracy": float(accuracy_score(y, pred)),
+        "macro_f1": float(f_macro),
+        "per_class": {c: {"precision": float(p[i]), "recall": float(r[i]),
+                          "f1": float(f[i]), "support": int(sup[i])}
+                      for i, c in enumerate(labels)},
+        "attack_vs_normal": {"precision": float(bp), "recall": float(br),
+                             "f1": float(bf),
+                             "accuracy": float(np.mean(yb == pb))},
+        "confusion_matrix": {"labels": labels,
+                             "rows_true_cols_predicted":
+                             confusion_matrix(y, pred, labels=labels).tolist()},
+    }
+
+
+def _binary_cm(y, pred) -> dict:
+    yb, pb = y != M.NORMAL, pred != M.NORMAL
+    return {"tp": int((yb & pb).sum()), "fn": int((yb & ~pb).sum()),
+            "fp": int((~yb & pb).sum()), "tn": int((~yb & ~pb).sum()),
+            "attack_named_correctly": int(((y == pred) & yb).sum())}
+
+
+def _drone_summary(ws, session_of, pred) -> dict:
+    """Operator's view: per session, was each attacked drone flagged with the
+    right type at least once, and how many honest drones were flagged."""
+    out = {}
+    for sess in dict.fromkeys(session_of):
+        truth, said = {}, {}
+        for (w, _), s_, p in zip(ws, session_of, pred):
+            if s_ != sess:
+                continue
+            truth.setdefault(w.subject, M.NORMAL)
+            if w.meta["cls"] != M.NORMAL:
+                truth[w.subject] = w.meta["cls"]
+            if p != M.NORMAL:
+                said.setdefault(w.subject, set()).add(str(p))
+        attacked = [d for d, c in truth.items() if c != M.NORMAL]
+        out[sess] = {
+            "attacked": len(attacked),
+            "attacked_flagged": sum(d in said for d in attacked),
+            "attacked_named_correctly": sum(truth[d] in said.get(d, ()) for d in attacked),
+            "honest_flagged": sorted(d for d in said if truth[d] == M.NORMAL),
+            "honest_total": sum(c == M.NORMAL for c in truth.values()),
+        }
+    return out
+
+
+def _blocks(ws, k):
+    """Contiguous time block (0..k-1) of each post-onset window."""
+    onset = ws[0][0].onset
+    end = max(w.end for w, _ in ws)
+    span = max(end - onset, 1)
+    return np.array([min(int((w.start - onset) * k / span), k - 1) for w, _ in ws])
+
+
+def evaluate_cascade(data, names, args) -> dict:
+    attacks = list(C.ATTACK_SESSIONS)
+    base = _pre(data[attacks[0]])
+    held = _pre(data["_heldout"])
+    post = {a: _post(data[a]) for a in attacks}
+    blk = {a: _blocks(post[a], args.folds) for a in attacks}
+    test = sum((post[a] for a in attacks), []) + held
+    y = _yc(test)
+    session_of = np.array([a for a in attacks for _ in post[a]] + ["_heldout"] * len(held))
+
+    # ---- known attack types: blocked cross-validation ------------------
+    runs = []
+    for seed in range(args.seeds):
+        pred = {a: np.empty(len(post[a]), dtype=object) for a in attacks}
+        for b in range(args.folds):
+            train = base + [x for a in attacks
+                            for x, bi in zip(post[a], blk[a]) if bi != b]
+            rf, _ = fit_rf(train, names, seed)
+            for a in attacks:
+                m = blk[a] == b
+                if m.any():
+                    rows = [x for x, keep in zip(post[a], m) if keep]
+                    pred[a][m] = _ml_labels(rf, _X(rows, names), args.rf_threshold)
+        rf_all, _ = fit_rf(base + sum(post.values(), []), names, seed)
+        ml_pred = np.concatenate([pred[a] for a in attacks]
+                                 + [_ml_labels(rf_all, _X(held, names),
+                                               args.rf_threshold)]).astype(str)
+        runs.append(_three_way(test, ml_pred))
+
+    known = {"n_windows": len(test), "folds": args.folds,
+             "class_support": {c: int((y == c).sum()) for c in M.CLASSES}}
+    for meth in METHODS:
+        per_seed = [multiclass_metrics(y, r[meth]) for r in runs]
+        m0 = per_seed[0]
+        m0["seed_spread"] = {
+            "accuracy": _ms([m["accuracy"] for m in per_seed]),
+            "macro_f1": _ms([m["macro_f1"] for m in per_seed]),
+            "attack_vs_normal_f1": _ms([m["attack_vs_normal"]["f1"] for m in per_seed])}
+        m0["per_session_confusion"] = {
+            a: _binary_cm(y[session_of == a], runs[0][meth][session_of == a])
+            for a in attacks + ["_heldout"]}
+        m0["drones"] = _drone_summary(test, session_of, runs[0][meth])
+        known[meth] = m0
+    rules_hit = runs[0]["rules"] != M.NORMAL
+    known["ml_windows_scored_in_cascade"] = {
+        "scored": int((~rules_hit).sum()), "skipped_by_rules": int(rules_hit.sum())}
+
+    # ---- unseen attack types: leave one attack out ---------------------
+    unseen = {}
+    for a in attacks:
+        others = [b for b in attacks
+                  if M.session_class(b) != M.session_class(a)]
+        rf, _ = fit_rf(base + sum((post[b] for b in others), []), names, 0)
+        ws = post[a] + held
+        yy = _yc(ws)
+        three = _three_way(ws, _ml_labels(rf, _X(ws, names), args.rf_threshold))
+        unseen[a] = {}
+        for meth in METHODS:
+            pr = three[meth]
+            yb, pb = yy != M.NORMAL, pr != M.NORMAL
+            p_, r_, f_, _ = precision_recall_fscore_support(
+                yb, pb, average="binary", zero_division=0)
+            unseen[a][meth] = {"precision": float(p_), "recall": float(r_),
+                               "f1": float(f_), **_binary_cm(yy, pr)}
+    return {"known_attack_types": known, "unseen_attack_type": unseen,
+            "caveats": [
+                "Few attacked windows: see class_support. One window more or "
+                "less moves a per-class F1 by 0.1-0.3.",
+                "Rule thresholds were chosen by looking at these same "
+                "recordings (rules.py documents the sensitivity of each); the "
+                "MITM rule has only one recording and is the most optimistic.",
+                "The forests never see a window from the block they predict; "
+                "rules have no training step.",
+                "Unseen-attack ML excludes the whole attack TYPE "
+                "(both data manipulation recordings together)."]}
 
 
 def _dummy_rf(names, base):
@@ -292,6 +501,41 @@ def report(ev, args) -> None:
               f"{d['honest_drones_alerted_during_attack']}")
 
 
+def report_cascade(cv) -> None:
+    k = cv["known_attack_types"]
+    print(f"\n  CASCADE · known attack types · blocked {k['folds']}-fold CV over time "
+          f"· {k['n_windows']} windows · attacked windows per class: "
+          + ", ".join(f"{c} {n}" for c, n in k["class_support"].items() if c != M.NORMAL))
+    print("  method     accuracy  macro F1  attack-vs-normal P / R / F1   "
+          + "  ".join(f"{c[:8]:>8}" for c in M.ATTACK_CLASSES) + "   (per-class F1)")
+    for meth in METHODS:
+        m = k[meth]
+        b = m["attack_vs_normal"]
+        print(f"  {meth:<9}  {m['accuracy']:.3f}     {m['macro_f1']:.3f}     "
+              f"{b['precision']:.2f} / {b['recall']:.2f} / {b['f1']:.2f}          "
+              + "  ".join(f"{m['per_class'][c]['f1']:>8.2f}" for c in M.ATTACK_CLASSES))
+    print("\n  per drone (attacked drones named correctly / honest drones flagged):")
+    for meth in METHODS:
+        d = k[meth]["drones"]
+        print(f"  {meth:<9}  " + "  ".join(
+            f"{s[:10]} {v['attacked_named_correctly']}/{v['attacked']},"
+            f"{len(v['honest_flagged'])}" for s, v in d.items()))
+    g = k["ml_windows_scored_in_cascade"]
+    print(f"  in the cascade the forest scores {g['scored']} windows; rules settle "
+          f"the other {g['skipped_by_rules']}")
+    cm = k["cascade"]["confusion_matrix"]
+    print("\n  cascade confusion matrix (rows = truth, columns = predicted)")
+    print("  " + " " * 17 + "".join(f"{c[:10]:>11}" for c in cm["labels"]))
+    for c, row in zip(cm["labels"], cm["rows_true_cols_predicted"]):
+        print(f"  {c:<17}" + "".join(f"{v:>11}" for v in row))
+
+    print("\n  CASCADE · unseen attack type (forest never saw it) · attack vs normal F1")
+    print("  attack               rules   ml      cascade")
+    for a, r in cv["unseen_attack_type"].items():
+        print(f"  {a:<20} {r['rules']['f1']:.2f}    {r['ml']['f1']:.2f}    "
+              f"{r['cascade']['f1']:.2f}")
+
+
 # ---------------------------------------------------------------------
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
@@ -304,6 +548,8 @@ def main() -> None:
     ap.add_argument("--persist", type=int, default=2,
                     help="consecutive anomalous windows before an anomaly alert")
     ap.add_argument("--rf-threshold", type=float, default=0.5)
+    ap.add_argument("--folds", type=int, default=5,
+                    help="time blocks per session for the cascade evaluation")
     ap.add_argument("--no-eval", action="store_true", help="only write the model")
     ap.add_argument("--out", default="results_ml.json")
     args = ap.parse_args()
@@ -324,6 +570,9 @@ def main() -> None:
         ev = evaluate(data, names, args)
         report(ev, args)
         results["evaluation"] = ev
+        cv = evaluate_cascade(data, names, args)
+        report_cascade(cv)
+        results["cascade"] = cv
 
     # ---- deployed bundle --------------------------------------------
     clf, thr, t_if = fit_iforest(base, names, args.alpha, 0)

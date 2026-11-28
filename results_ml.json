@@ -91,6 +91,7 @@
             "first_delay_s": 25,
             "honest_drones_alerted_during_attack": 5,
             "alerts_before_onset": 0,
+            "alerts_from_onset_window": 0,
             "drones_total": 54
           }
         },
@@ -123,6 +124,7 @@
             "first_delay_s": 85,
             "honest_drones_alerted_during_attack": 2,
             "alerts_before_onset": 0,
+            "alerts_from_onset_window": 0,
             "drones_total": 54
           }
         },
@@ -155,6 +157,7 @@
             "first_delay_s": 25,
             "honest_drones_alerted_during_attack": 6,
             "alerts_before_onset": 0,
+            "alerts_from_onset_window": 0,
             "drones_total": 54
           }
         },
@@ -187,6 +190,7 @@
             "first_delay_s": 25,
             "honest_drones_alerted_during_attack": 1,
             "alerts_before_onset": 0,
+            "alerts_from_onset_window": 0,
             "drones_total": 54
           }
         },
@@ -219,6 +223,7 @@
             "first_delay_s": 25,
             "honest_drones_alerted_during_attack": 0,
             "alerts_before_onset": 0,
+            "alerts_from_onset_window": 0,
             "drones_total": 62
           }
         }
@@ -228,23 +233,23 @@
       "CriticalNode": {
         "window": {
           "auc": {
-            "mean": 0.9991,
-            "std": 0.0017
+            "mean": 1.0,
+            "std": 0.0
           },
           "precision": {
             "mean": 1.0,
             "std": 0.0
           },
           "recall": {
-            "mean": 0.1667,
+            "mean": 1.0,
             "std": 0.0
           },
           "f1": {
-            "mean": 0.2857,
+            "mean": 1.0,
             "std": 0.0
           },
           "flagged_rate": {
-            "mean": 0.0045,
+            "mean": 0.0269,
             "std": 0.0
           }
         },
@@ -255,17 +260,18 @@
         "drone": {
           "attacked_drones": 1,
           "attacked_alerted": 1,
-          "first_delay_s": 190,
+          "first_delay_s": 25,
           "honest_drones_alerted_during_attack": 0,
           "alerts_before_onset": 0,
+          "alerts_from_onset_window": 0,
           "drones_total": 54
         }
       },
       "MITM": {
         "window": {
           "auc": {
-            "mean": 0.7775,
-            "std": 0.0158
+            "mean": 0.7912,
+            "std": 0.0142
           },
           "precision": {
             "mean": 0.0,
@@ -294,30 +300,31 @@
           "first_delay_s": null,
           "honest_drones_alerted_during_attack": 0,
           "alerts_before_onset": 0,
+          "alerts_from_onset_window": 0,
           "drones_total": 54
         }
       },
       "DataManipulation": {
         "window": {
           "auc": {
-            "mean": 0.9296,
-            "std": 0.0077
+            "mean": 0.9257,
+            "std": 0.01
           },
           "precision": {
             "mean": 1.0,
             "std": 0.0
           },
           "recall": {
-            "mean": 0.2,
-            "std": 0.0
+            "mean": 0.56,
+            "std": 0.0894
           },
           "f1": {
-            "mean": 0.3333,
-            "std": 0.0
+            "mean": 0.7143,
+            "std": 0.0799
           },
           "flagged_rate": {
-            "mean": 0.004,
-            "std": 0.0
+            "mean": 0.0111,
+            "std": 0.0018
           }
         },
         "held_out_window_fpr": {
@@ -329,31 +336,32 @@
           "attacked_alerted": 1,
           "first_delay_s": 10,
           "honest_drones_alerted_during_attack": 0,
-          "alerts_before_onset": 1,
+          "alerts_before_onset": 0,
+          "alerts_from_onset_window": 1,
           "drones_total": 54
         }
       },
       "DataManipulation2": {
         "window": {
           "auc": {
-            "mean": 0.9991,
-            "std": 0.0019
+            "mean": 0.9986,
+            "std": 0.0022
           },
           "precision": {
-            "mean": 0.96,
-            "std": 0.0894
+            "mean": 0.92,
+            "std": 0.0447
           },
           "recall": {
-            "mean": 0.6667,
-            "std": 0.1361
+            "mean": 1.0,
+            "std": 0.0
           },
           "f1": {
-            "mean": 0.7843,
-            "std": 0.1248
+            "mean": 0.9579,
+            "std": 0.0235
           },
           "flagged_rate": {
-            "mean": 0.029,
-            "std": 0.0039
+            "mean": 0.0458,
+            "std": 0.0021
           }
         },
         "held_out_window_fpr": {
@@ -364,8 +372,9 @@
           "attacked_drones": 1,
           "attacked_alerted": 1,
           "first_delay_s": 10,
-          "honest_drones_alerted_during_attack": 1,
-          "alerts_before_onset": 1,
+          "honest_drones_alerted_during_attack": 0,
+          "alerts_before_onset": 0,
+          "alerts_from_onset_window": 1,
           "drones_total": 54
         }
       },
@@ -376,20 +385,20 @@
             "std": 0.0
           },
           "precision": {
-            "mean": 1.0,
-            "std": 0.0
+            "mean": 0.995,
+            "std": 0.0045
           },
           "recall": {
             "mean": 1.0,
             "std": 0.0
           },
           "f1": {
-            "mean": 1.0,
-            "std": 0.0
+            "mean": 0.9975,
+            "std": 0.0023
           },
           "flagged_rate": {
-            "mean": 0.4082,
-            "std": 0.0
+            "mean": 0.4102,
+            "std": 0.0019
           }
         },
         "held_out_window_fpr": {
@@ -400,8 +409,9 @@
           "attacked_drones": 8,
           "attacked_alerted": 8,
           "first_delay_s": 10,
-          "honest_drones_alerted_during_attack": 0,
-          "alerts_before_onset": 8,
+          "honest_drones_alerted_during_attack": 1,
+          "alerts_before_onset": 0,
+          "alerts_from_onset_window": 8,
           "drones_total": 62
         }
       }
@@ -435,11 +445,773 @@
           "attacked_alerted": 1,
           "first_delay_s": 10,
           "honest_drones_alerted_during_attack": 1,
-          "alerts_before_onset": 1,
+          "alerts_before_onset": 0,
+          "alerts_from_onset_window": 1,
           "drones_total": 54
         }
       }
     }
+  },
+  "cascade": {
+    "known_attack_types": {
+      "n_windows": 1585,
+      "folds": 5,
+      "class_support": {
+        "normal": 1426,
+        "CriticalNode": 6,
+        "DataManipulation": 14,
+        "MITM": 19,
+        "Sybil": 120
+      },
+      "rules": {
+        "accuracy": 0.9993690851735015,
+        "macro_f1": 0.9945244929472059,
+        "per_class": {
+          "normal": {
+            "precision": 0.9992992291520673,
+            "recall": 1.0,
+            "f1": 0.9996494917630564,
+            "support": 1426
+          },
+          "CriticalNode": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 6
+          },
+          "DataManipulation": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 14
+          },
+          "MITM": {
+            "precision": 1.0,
+            "recall": 0.9473684210526315,
+            "f1": 0.972972972972973,
+            "support": 19
+          },
+          "Sybil": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 120
+          }
+        },
+        "attack_vs_normal": {
+          "precision": 1.0,
+          "recall": 0.9937106918238994,
+          "f1": 0.9968454258675079,
+          "accuracy": 0.9993690851735015
+        },
+        "confusion_matrix": {
+          "labels": [
+            "normal",
+            "CriticalNode",
+            "DataManipulation",
+            "MITM",
+            "Sybil"
+          ],
+          "rows_true_cols_predicted": [
+            [
+              1426,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              6,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              14,
+              0,
+              0
+            ],
+            [
+              1,
+              0,
+              0,
+              18,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              120
+            ]
+          ]
+        },
+        "seed_spread": {
+          "accuracy": {
+            "mean": 0.9994,
+            "std": 0.0
+          },
+          "macro_f1": {
+            "mean": 0.9945,
+            "std": 0.0
+          },
+          "attack_vs_normal_f1": {
+            "mean": 0.9968,
+            "std": 0.0
+          }
+        },
+        "per_session_confusion": {
+          "CriticalNode": {
+            "tp": 6,
+            "fn": 0,
+            "fp": 0,
+            "tn": 217,
+            "attack_named_correctly": 6
+          },
+          "MITM": {
+            "tp": 18,
+            "fn": 1,
+            "fp": 0,
+            "tn": 394,
+            "attack_named_correctly": 18
+          },
+          "DataManipulation": {
+            "tp": 5,
+            "fn": 0,
+            "fp": 0,
+            "tn": 247,
+            "attack_named_correctly": 5
+          },
+          "DataManipulation2": {
+            "tp": 9,
+            "fn": 0,
+            "fp": 0,
+            "tn": 205,
+            "attack_named_correctly": 9
+          },
+          "Sybil": {
+            "tp": 120,
+            "fn": 0,
+            "fp": 0,
+            "tn": 174,
+            "attack_named_correctly": 120
+          },
+          "_heldout": {
+            "tp": 0,
+            "fn": 0,
+            "fp": 0,
+            "tn": 189,
+            "attack_named_correctly": 0
+          }
+        },
+        "drones": {
+          "CriticalNode": {
+            "attacked": 1,
+            "attacked_flagged": 1,
+            "attacked_named_correctly": 1,
+            "honest_flagged": [],
+            "honest_total": 51
+          },
+          "MITM": {
+            "attacked": 1,
+            "attacked_flagged": 1,
+            "attacked_named_correctly": 1,
+            "honest_flagged": [],
+            "honest_total": 52
+          },
+          "DataManipulation": {
+            "attacked": 1,
+            "attacked_flagged": 1,
+            "attacked_named_correctly": 1,
+            "honest_flagged": [],
+            "honest_total": 52
+          },
+          "DataManipulation2": {
+            "attacked": 1,
+            "attacked_flagged": 1,
+            "attacked_named_correctly": 1,
+            "honest_flagged": [],
+            "honest_total": 51
+          },
+          "Sybil": {
+            "attacked": 8,
+            "attacked_flagged": 8,
+            "attacked_named_correctly": 8,
+            "honest_flagged": [],
+            "honest_total": 43
+          },
+          "_heldout": {
+            "attacked": 0,
+            "attacked_flagged": 0,
+            "attacked_named_correctly": 0,
+            "honest_flagged": [],
+            "honest_total": 54
+          }
+        }
+      },
+      "ml": {
+        "accuracy": 0.983596214511041,
+        "macro_f1": 0.7689757142135063,
+        "per_class": {
+          "normal": {
+            "precision": 0.9909281228192603,
+            "recall": 0.9957924263674615,
+            "f1": 0.9933543196922001,
+            "support": 1426
+          },
+          "CriticalNode": {
+            "precision": 0.375,
+            "recall": 0.5,
+            "f1": 0.42857142857142855,
+            "support": 6
+          },
+          "DataManipulation": {
+            "precision": 1.0,
+            "recall": 0.8571428571428571,
+            "f1": 0.9230769230769231,
+            "support": 14
+          },
+          "MITM": {
+            "precision": 0.6,
+            "recall": 0.47368421052631576,
+            "f1": 0.5294117647058824,
+            "support": 19
+          },
+          "Sybil": {
+            "precision": 0.9829059829059829,
+            "recall": 0.9583333333333334,
+            "f1": 0.9704641350210971,
+            "support": 120
+          }
+        },
+        "attack_vs_normal": {
+          "precision": 0.9605263157894737,
+          "recall": 0.9182389937106918,
+          "f1": 0.9389067524115756,
+          "accuracy": 0.98801261829653
+        },
+        "confusion_matrix": {
+          "labels": [
+            "normal",
+            "CriticalNode",
+            "DataManipulation",
+            "MITM",
+            "Sybil"
+          ],
+          "rows_true_cols_predicted": [
+            [
+              1420,
+              0,
+              0,
+              6,
+              0
+            ],
+            [
+              1,
+              3,
+              0,
+              0,
+              2
+            ],
+            [
+              2,
+              0,
+              12,
+              0,
+              0
+            ],
+            [
+              10,
+              0,
+              0,
+              9,
+              0
+            ],
+            [
+              0,
+              5,
+              0,
+              0,
+              115
+            ]
+          ]
+        },
+        "seed_spread": {
+          "accuracy": {
+            "mean": 0.9832,
+            "std": 0.0041
+          },
+          "macro_f1": {
+            "mean": 0.7796,
+            "std": 0.0408
+          },
+          "attack_vs_normal_f1": {
+            "mean": 0.9374,
+            "std": 0.0027
+          }
+        },
+        "per_session_confusion": {
+          "CriticalNode": {
+            "tp": 5,
+            "fn": 1,
+            "fp": 0,
+            "tn": 217,
+            "attack_named_correctly": 3
+          },
+          "MITM": {
+            "tp": 9,
+            "fn": 10,
+            "fp": 6,
+            "tn": 388,
+            "attack_named_correctly": 9
+          },
+          "DataManipulation": {
+            "tp": 3,
+            "fn": 2,
+            "fp": 0,
+            "tn": 247,
+            "attack_named_correctly": 3
+          },
+          "DataManipulation2": {
+            "tp": 9,
+            "fn": 0,
+            "fp": 0,
+            "tn": 205,
+            "attack_named_correctly": 9
+          },
+          "Sybil": {
+            "tp": 120,
+            "fn": 0,
+            "fp": 0,
+            "tn": 174,
+            "attack_named_correctly": 115
+          },
+          "_heldout": {
+            "tp": 0,
+            "fn": 0,
+            "fp": 0,
+            "tn": 189,
+            "attack_named_correctly": 0
+          }
+        },
+        "drones": {
+          "CriticalNode": {
+            "attacked": 1,
+            "attacked_flagged": 1,
+            "attacked_named_correctly": 1,
+            "honest_flagged": [],
+            "honest_total": 51
+          },
+          "MITM": {
+            "attacked": 1,
+            "attacked_flagged": 1,
+            "attacked_named_correctly": 1,
+            "honest_flagged": [
+              "Drone46",
+              "Drone48"
+            ],
+            "honest_total": 52
+          },
+          "DataManipulation": {
+            "attacked": 1,
+            "attacked_flagged": 1,
+            "attacked_named_correctly": 1,
+            "honest_flagged": [],
+            "honest_total": 52
+          },
+          "DataManipulation2": {
+            "attacked": 1,
+            "attacked_flagged": 1,
+            "attacked_named_correctly": 1,
+            "honest_flagged": [],
+            "honest_total": 51
+          },
+          "Sybil": {
+            "attacked": 8,
+            "attacked_flagged": 8,
+            "attacked_named_correctly": 8,
+            "honest_flagged": [],
+            "honest_total": 43
+          },
+          "_heldout": {
+            "attacked": 0,
+            "attacked_flagged": 0,
+            "attacked_named_correctly": 0,
+            "honest_flagged": [],
+            "honest_total": 54
+          }
+        }
+      },
+      "cascade": {
+        "accuracy": 0.9955835962145111,
+        "macro_f1": 0.9669501147678912,
+        "per_class": {
+          "normal": {
+            "precision": 0.9992962702322308,
+            "recall": 0.9957924263674615,
+            "f1": 0.9975412715138743,
+            "support": 1426
+          },
+          "CriticalNode": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 6
+          },
+          "DataManipulation": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 14
+          },
+          "MITM": {
+            "precision": 0.75,
+            "recall": 0.9473684210526315,
+            "f1": 0.8372093023255814,
+            "support": 19
+          },
+          "Sybil": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1": 1.0,
+            "support": 120
+          }
+        },
+        "attack_vs_normal": {
+          "precision": 0.9634146341463414,
+          "recall": 0.9937106918238994,
+          "f1": 0.978328173374613,
+          "accuracy": 0.9955835962145111
+        },
+        "confusion_matrix": {
+          "labels": [
+            "normal",
+            "CriticalNode",
+            "DataManipulation",
+            "MITM",
+            "Sybil"
+          ],
+          "rows_true_cols_predicted": [
+            [
+              1420,
+              0,
+              0,
+              6,
+              0
+            ],
+            [
+              0,
+              6,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              14,
+              0,
+              0
+            ],
+            [
+              1,
+              0,
+              0,
+              18,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              120
+            ]
+          ]
+        },
+        "seed_spread": {
+          "accuracy": {
+            "mean": 0.9958,
+            "std": 0.0006
+          },
+          "macro_f1": {
+            "mean": 0.9664,
+            "std": 0.0049
+          },
+          "attack_vs_normal_f1": {
+            "mean": 0.9795,
+            "std": 0.0027
+          }
+        },
+        "per_session_confusion": {
+          "CriticalNode": {
+            "tp": 6,
+            "fn": 0,
+            "fp": 0,
+            "tn": 217,
+            "attack_named_correctly": 6
+          },
+          "MITM": {
+            "tp": 18,
+            "fn": 1,
+            "fp": 6,
+            "tn": 388,
+            "attack_named_correctly": 18
+          },
+          "DataManipulation": {
+            "tp": 5,
+            "fn": 0,
+            "fp": 0,
+            "tn": 247,
+            "attack_named_correctly": 5
+          },
+          "DataManipulation2": {
+            "tp": 9,
+            "fn": 0,
+            "fp": 0,
+            "tn": 205,
+            "attack_named_correctly": 9
+          },
+          "Sybil": {
+            "tp": 120,
+            "fn": 0,
+            "fp": 0,
+            "tn": 174,
+            "attack_named_correctly": 120
+          },
+          "_heldout": {
+            "tp": 0,
+            "fn": 0,
+            "fp": 0,
+            "tn": 189,
+            "attack_named_correctly": 0
+          }
+        },
+        "drones": {
+          "CriticalNode": {
+            "attacked": 1,
+            "attacked_flagged": 1,
+            "attacked_named_correctly": 1,
+            "honest_flagged": [],
+            "honest_total": 51
+          },
+          "MITM": {
+            "attacked": 1,
+            "attacked_flagged": 1,
+            "attacked_named_correctly": 1,
+            "honest_flagged": [
+              "Drone46",
+              "Drone48"
+            ],
+            "honest_total": 52
+          },
+          "DataManipulation": {
+            "attacked": 1,
+            "attacked_flagged": 1,
+            "attacked_named_correctly": 1,
+            "honest_flagged": [],
+            "honest_total": 52
+          },
+          "DataManipulation2": {
+            "attacked": 1,
+            "attacked_flagged": 1,
+            "attacked_named_correctly": 1,
+            "honest_flagged": [],
+            "honest_total": 51
+          },
+          "Sybil": {
+            "attacked": 8,
+            "attacked_flagged": 8,
+            "attacked_named_correctly": 8,
+            "honest_flagged": [],
+            "honest_total": 43
+          },
+          "_heldout": {
+            "attacked": 0,
+            "attacked_flagged": 0,
+            "attacked_named_correctly": 0,
+            "honest_flagged": [],
+            "honest_total": 54
+          }
+        }
+      },
+      "ml_windows_scored_in_cascade": {
+        "scored": 1427,
+        "skipped_by_rules": 158
+      }
+    },
+    "unseen_attack_type": {
+      "CriticalNode": {
+        "rules": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "tp": 6,
+          "fn": 0,
+          "fp": 0,
+          "tn": 406,
+          "attack_named_correctly": 6
+        },
+        "ml": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "tp": 6,
+          "fn": 0,
+          "fp": 0,
+          "tn": 406,
+          "attack_named_correctly": 0
+        },
+        "cascade": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "tp": 6,
+          "fn": 0,
+          "fp": 0,
+          "tn": 406,
+          "attack_named_correctly": 6
+        }
+      },
+      "MITM": {
+        "rules": {
+          "precision": 1.0,
+          "recall": 0.9473684210526315,
+          "f1": 0.972972972972973,
+          "tp": 18,
+          "fn": 1,
+          "fp": 0,
+          "tn": 583,
+          "attack_named_correctly": 18
+        },
+        "ml": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "tp": 0,
+          "fn": 19,
+          "fp": 0,
+          "tn": 583,
+          "attack_named_correctly": 0
+        },
+        "cascade": {
+          "precision": 1.0,
+          "recall": 0.9473684210526315,
+          "f1": 0.972972972972973,
+          "tp": 18,
+          "fn": 1,
+          "fp": 0,
+          "tn": 583,
+          "attack_named_correctly": 18
+        }
+      },
+      "DataManipulation": {
+        "rules": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "tp": 5,
+          "fn": 0,
+          "fp": 0,
+          "tn": 436,
+          "attack_named_correctly": 5
+        },
+        "ml": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "tp": 0,
+          "fn": 5,
+          "fp": 0,
+          "tn": 436,
+          "attack_named_correctly": 0
+        },
+        "cascade": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "tp": 5,
+          "fn": 0,
+          "fp": 0,
+          "tn": 436,
+          "attack_named_correctly": 5
+        }
+      },
+      "DataManipulation2": {
+        "rules": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "tp": 9,
+          "fn": 0,
+          "fp": 0,
+          "tn": 394,
+          "attack_named_correctly": 9
+        },
+        "ml": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "tp": 0,
+          "fn": 9,
+          "fp": 0,
+          "tn": 394,
+          "attack_named_correctly": 0
+        },
+        "cascade": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "tp": 9,
+          "fn": 0,
+          "fp": 0,
+          "tn": 394,
+          "attack_named_correctly": 9
+        }
+      },
+      "Sybil": {
+        "rules": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "tp": 120,
+          "fn": 0,
+          "fp": 0,
+          "tn": 363,
+          "attack_named_correctly": 120
+        },
+        "ml": {
+          "precision": 0.9917355371900827,
+          "recall": 1.0,
+          "f1": 0.995850622406639,
+          "tp": 120,
+          "fn": 0,
+          "fp": 1,
+          "tn": 362,
+          "attack_named_correctly": 0
+        },
+        "cascade": {
+          "precision": 0.9917355371900827,
+          "recall": 1.0,
+          "f1": 0.995850622406639,
+          "tp": 120,
+          "fn": 0,
+          "fp": 1,
+          "tn": 362,
+          "attack_named_correctly": 120
+        }
+      }
+    },
+    "caveats": [
+      "Few attacked windows: see class_support. One window more or less moves a per-class F1 by 0.1-0.3.",
+      "Rule thresholds were chosen by looking at these same recordings (rules.py documents the sensitivity of each); the MITM rule has only one recording and is the most optimistic.",
+      "The forests never see a window from the block they predict; rules have no training step.",
+      "Unseen-attack ML excludes the whole attack TYPE (both data manipulation recordings together)."
+    ]
   },
   "deployed": {
     "trained_on": [
@@ -454,49 +1226,49 @@
     "sklearn": "1.5.2",
     "n_train_windows": 1372,
     "n_baseline_windows": 199,
-    "train_seconds_iforest": 0.224,
-    "train_seconds_rf": 0.432,
-    "score_ms_per_batch_of_54_windows": 8.91,
+    "train_seconds_iforest": 0.198,
+    "train_seconds_rf": 0.455,
+    "score_ms_per_batch_of_54_windows": 8.38,
     "rf_top_features": [
       {
         "feature": "max_streak",
-        "importance": 0.1472
+        "importance": 0.1588
       },
       {
         "feature": "streak_end",
-        "importance": 0.108
+        "importance": 0.1392
       },
       {
-        "feature": "alive_while_silent",
-        "importance": 0.0709
-      },
-      {
-        "feature": "initiated_ok_rate",
-        "importance": 0.0609
-      },
-      {
-        "feature": "Trust_BA_max",
-        "importance": 0.0469
-      },
-      {
-        "feature": "n_initiated",
-        "importance": 0.0443
+        "feature": "DT_Speed_mps_mean",
+        "importance": 0.0556
       },
       {
         "feature": "n_requests",
-        "importance": 0.0398
+        "importance": 0.049
       },
       {
-        "feature": "Trust_Score_max",
-        "importance": 0.0347
+        "feature": "initiated_ok_rate",
+        "importance": 0.0482
       },
       {
-        "feature": "Trust_BA_mean",
-        "importance": 0.0314
+        "feature": "alive_while_silent",
+        "importance": 0.0462
       },
       {
-        "feature": "DT_RotorAvgSpeed_mean",
-        "importance": 0.0306
+        "feature": "dq_validity",
+        "importance": 0.0433
+      },
+      {
+        "feature": "n_initiated",
+        "importance": 0.0414
+      },
+      {
+        "feature": "Trust_RI_max",
+        "importance": 0.0357
+      },
+      {
+        "feature": "dq_consistency",
+        "importance": 0.0291
       }
     ]
   }

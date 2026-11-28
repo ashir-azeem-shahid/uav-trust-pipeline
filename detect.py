@@ -5,10 +5,18 @@ The consumer. Reads uav.telemetry, runs every stage per message, writes
 uav.verdict.
 
   stage 1  data quality        -> dq.py      QUARANTINE verdicts
-  stage 3  suppression rule    -> rules.py   SUPPRESSION verdicts (Track A)
+  stage 3  rules (Track A)     -> rules.py   one cheap rule per attack type:
+                                             SYBIL, SUPPRESSION (Critical Node),
+                                             DATA_MANIPULATION, MITM
   stage 4  machine learning    -> ml.py      ANOMALY and ML_COMPROMISED
                                              verdicts (Track B), once per
-                                             drone per 15 s window
+                                             drone per 15 s window -- ONLY for
+                                             drones no rule has flagged
+
+The cascade: rules are cheap and explainable, so they go first. A drone a
+rule has already named is not sent to the models (its windows are counted
+in ml_gated instead). The models only see what the rules have not caught.
+Every alert carries attack_type and the stage that caught it.
 
 Usage
 -----
@@ -26,7 +34,7 @@ import time
 
 import config as C
 from dq import DQValidator
-from rules import SuppressionDetector
+from rules import RULE_ATTACK_TYPE, RuleEngine
 
 
 class Pipeline:
@@ -45,8 +53,11 @@ class Pipeline:
         collect_windows: keep every closed ML window (train_ml.py uses this
             to build training data through this exact code path).
         """
-        self.suppression = SuppressionDetector(
+        self.rules = RuleEngine(
             streak if streak is not None else __import__("rules").DEFAULT_STREAK)
+        # the Critical Node rule's per-drone state: the ML windows and the
+        # dashboard read streaks from it
+        self.suppression = self.rules.suppression
         self.dq = DQValidator()
         self.verdicts_emitted = 0
         self.messages_seen = 0
@@ -54,6 +65,9 @@ class Pipeline:
         self.dq_scores: list[float] = []
         self.last_dq = None          # most recent DQResult, for features.py
         self.already_flagged: set[str] = set()
+        # drone -> (verdict, attack_type, t_session) of the rule that caught it
+        self.rule_hits: dict[str, tuple[str, str, int]] = {}
+        self.ml_gated = 0            # windows not scored: a rule already caught the drone
         self.latencies: list[float] = []
         # ---- Track B state ----
         from ml import MODEL_PATH, MLScorer, SubjectWindower
@@ -99,8 +113,8 @@ class Pipeline:
         # ---- stage 2: trust ingest --------------------------------
         # trust = trust.validate(msg["trust"])
 
-        # ---- stage 3: suppression rule (Track A) ------------------
-        fired, reason = self.suppression.handle(msg)
+        # ---- stage 3: rules (Track A) ------------------------------
+        fired, reason = self.rules.handle(msg)
 
         # ---- stage 4: ML (Track B) -------------------------------
         # Adds this message to its drone's 15 s window. When the stream
@@ -113,12 +127,15 @@ class Pipeline:
         drone = msg["about"]
         if fired and drone not in self.already_flagged:
             self.already_flagged.add(drone)
+            self.rule_hits[drone] = (fired, RULE_ATTACK_TYPE[fired], msg["t_session"])
             self.verdicts_emitted += 1
             return {
                 "drone": drone,
                 "t_session": msg["t_session"],
-                "verdict": "SUPPRESSION",
+                "verdict": fired,
                 "track": "A",
+                "attack_type": RULE_ATTACK_TYPE[fired],
+                "stage": "rule",
                 "reason": reason,
                 "onset": msg.get("onset"),
                 "detection_delay_s": (msg["t_session"] - msg["onset"])
@@ -139,7 +156,10 @@ class Pipeline:
         if self.windows is not None:
             self.windows.extend(closed)
         if self.scorer is not None:
-            self.ml_pending.extend(self.scorer.verdicts(closed))
+            # the cascade gate: a drone a rule already caught is not scored
+            todo = [w for w in closed if w.subject not in self.already_flagged]
+            self.ml_gated += len(closed) - len(todo)
+            self.ml_pending.extend(self.scorer.verdicts(todo))
 
     def drain_ml(self) -> list[dict]:
         """ML verdicts produced since the last call (Track B)."""
@@ -159,6 +179,7 @@ class Pipeline:
             "messages": self.messages_seen,
             "verdicts": self.verdicts_emitted,
             "quarantined": self.quarantined,
+            "ml_windows_gated": self.ml_gated,
             "dq_mean": (sum(self.dq_scores) / len(self.dq_scores))
                        if self.dq_scores else float("nan"),
             "per_msg_ms_p50": pct(0.50),
@@ -183,8 +204,9 @@ def run_offline(attack: str, use_ml: bool = False) -> None:
         bad = ("ghost" in v["drone"].lower()
                if (attack_type or "").lower() == "sybil" else v["drone"] == victim)
         mark = "CORRECT" if bad else "FALSE POSITIVE"
-        print(f"  [{mark}] {v['verdict']:<14} {v['drone']} at t={v['t_session']}s  "
-              f"delay={v['detection_delay_s']}s")
+        print(f"  [{mark}] {v['verdict']:<17} {v['drone']} as "
+              f"{v.get('attack_type') or '?'} ({v.get('stage', 'ml')}) at "
+              f"t={v['t_session']}s  delay={v['detection_delay_s']}s")
         print(f"           {v['reason']}")
 
     for _key, msg, _onset in R.replay_with_onset(attack):
