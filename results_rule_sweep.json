@@ -1,0 +1,1087 @@
+{
+  "MITM": [
+    {
+      "settings": {
+        "MITM_HISTORY": 60,
+        "MITM_FAIL_RATE": 0.6,
+        "MITM_MIN_RTT_S": 0.8
+      },
+      "hits": [
+        "MITM:Drone34@10s"
+      ],
+      "false_positives": [
+        "CriticalNode:Drone42@21s",
+        "CriticalNode:Drone33@23s",
+        "CriticalNode:Drone8@23s",
+        "CriticalNode:Drone40@23s",
+        "CriticalNode:Drone41@23s",
+        "CriticalNode:Drone34@24s",
+        "CriticalNode:Drone14@24s",
+        "CriticalNode:Drone36@27s",
+        "CriticalNode:Drone13@30s",
+        "CriticalNode:Drone7@30s",
+        "MITM:Drone14@22s",
+        "MITM:Drone36@150s",
+        "DataManipulation:Drone9@19s",
+        "DataManipulation:Drone42@20s",
+        "DataManipulation:Drone40@21s",
+        "DataManipulation:Drone39@23s",
+        "DataManipulation:Drone14@24s",
+        "DataManipulation:Drone36@24s",
+        "DataManipulation:Drone34@25s",
+        "DataManipulation:Drone15@27s",
+        "DataManipulation:Drone8@27s",
+        "DataManipulation:Drone11@30s",
+        "DataManipulation:Drone13@32s",
+        "DataManipulation2:Drone13@15s",
+        "DataManipulation2:Drone7@17s",
+        "DataManipulation2:Drone15@17s",
+        "DataManipulation2:Drone40@19s",
+        "DataManipulation2:Drone11@20s",
+        "DataManipulation2:Drone36@20s",
+        "DataManipulation2:Drone8@25s",
+        "DataManipulation2:Drone17@117s",
+        "Sybil:Drone13@11s"
+      ]
+    },
+    {
+      "settings": {
+        "MITM_HISTORY": 60,
+        "MITM_FAIL_RATE": 0.6,
+        "MITM_MIN_RTT_S": 1.0
+      },
+      "hits": [
+        "MITM:Drone34@10s"
+      ],
+      "false_positives": [
+        "CriticalNode:Drone33@23s",
+        "CriticalNode:Drone8@23s",
+        "CriticalNode:Drone41@23s",
+        "CriticalNode:Drone34@24s",
+        "CriticalNode:Drone36@27s",
+        "CriticalNode:Drone13@30s",
+        "CriticalNode:Drone7@30s",
+        "DataManipulation:Drone9@19s",
+        "DataManipulation:Drone42@20s",
+        "DataManipulation:Drone40@21s",
+        "DataManipulation:Drone39@23s",
+        "DataManipulation:Drone36@24s",
+        "DataManipulation:Drone34@25s",
+        "DataManipulation:Drone15@27s",
+        "DataManipulation:Drone8@27s",
+        "DataManipulation:Drone11@30s",
+        "DataManipulation:Drone13@32s",
+        "DataManipulation2:Drone13@15s",
+        "DataManipulation2:Drone7@17s",
+        "DataManipulation2:Drone15@17s",
+        "DataManipulation2:Drone40@19s",
+        "Sybil:Drone13@11s"
+      ]
+    },
+    {
+      "settings": {
+        "MITM_HISTORY": 60,
+        "MITM_FAIL_RATE": 0.6,
+        "MITM_MIN_RTT_S": 1.2
+      },
+      "hits": [
+        "MITM:Drone34@12s"
+      ],
+      "false_positives": [
+        "CriticalNode:Drone33@23s",
+        "CriticalNode:Drone8@23s",
+        "CriticalNode:Drone41@23s",
+        "CriticalNode:Drone34@24s",
+        "CriticalNode:Drone36@27s",
+        "CriticalNode:Drone13@30s",
+        "CriticalNode:Drone7@30s",
+        "DataManipulation:Drone9@19s",
+        "DataManipulation:Drone42@20s",
+        "DataManipulation:Drone40@21s",
+        "DataManipulation:Drone39@23s",
+        "DataManipulation:Drone34@25s",
+        "DataManipulation:Drone15@27s",
+        "DataManipulation:Drone8@27s",
+        "DataManipulation:Drone11@30s",
+        "DataManipulation:Drone13@32s",
+        "DataManipulation2:Drone13@15s",
+        "DataManipulation2:Drone7@17s",
+        "DataManipulation2:Drone15@17s",
+        "Sybil:Drone13@11s"
+      ]
+    },
+    {
+      "settings": {
+        "MITM_HISTORY": 60,
+        "MITM_FAIL_RATE": 0.7,
+        "MITM_MIN_RTT_S": 0.8
+      },
+      "hits": [
+        "MITM:Drone34@13s"
+      ],
+      "false_positives": [
+        "CriticalNode:Drone42@23s",
+        "CriticalNode:Drone33@24s",
+        "CriticalNode:Drone40@24s",
+        "CriticalNode:Drone14@24s",
+        "CriticalNode:Drone8@25s",
+        "CriticalNode:Drone34@27s",
+        "CriticalNode:Drone41@30s",
+        "CriticalNode:Drone36@30s",
+        "MITM:Drone14@25s",
+        "DataManipulation:Drone42@21s",
+        "DataManipulation:Drone40@24s",
+        "DataManipulation:Drone39@26s",
+        "DataManipulation:Drone34@26s",
+        "DataManipulation:Drone36@27s",
+        "DataManipulation:Drone14@29s",
+        "DataManipulation2:Drone15@17s",
+        "DataManipulation2:Drone7@18s",
+        "DataManipulation2:Drone13@20s",
+        "DataManipulation2:Drone40@20s",
+        "DataManipulation2:Drone36@21s",
+        "DataManipulation2:Drone17@117s"
+      ]
+    },
+    {
+      "settings": {
+        "MITM_HISTORY": 60,
+        "MITM_FAIL_RATE": 0.7,
+        "MITM_MIN_RTT_S": 1.0
+      },
+      "hits": [
+        "MITM:Drone34@13s"
+      ],
+      "false_positives": [
+        "CriticalNode:Drone33@24s",
+        "CriticalNode:Drone8@25s",
+        "CriticalNode:Drone34@27s",
+        "CriticalNode:Drone41@30s",
+        "CriticalNode:Drone36@30s",
+        "DataManipulation:Drone42@21s",
+        "DataManipulation:Drone40@24s",
+        "DataManipulation:Drone39@26s",
+        "DataManipulation:Drone34@26s",
+        "DataManipulation:Drone36@27s",
+        "DataManipulation2:Drone15@17s",
+        "DataManipulation2:Drone7@18s",
+        "DataManipulation2:Drone13@20s",
+        "DataManipulation2:Drone40@20s"
+      ]
+    },
+    {
+      "settings": {
+        "MITM_HISTORY": 60,
+        "MITM_FAIL_RATE": 0.7,
+        "MITM_MIN_RTT_S": 1.2
+      },
+      "hits": [
+        "MITM:Drone34@13s"
+      ],
+      "false_positives": [
+        "CriticalNode:Drone33@24s",
+        "CriticalNode:Drone8@25s",
+        "CriticalNode:Drone34@27s",
+        "CriticalNode:Drone41@30s",
+        "CriticalNode:Drone36@30s",
+        "DataManipulation:Drone42@21s",
+        "DataManipulation:Drone40@24s",
+        "DataManipulation:Drone39@26s",
+        "DataManipulation:Drone34@26s",
+        "DataManipulation2:Drone15@17s",
+        "DataManipulation2:Drone7@18s",
+        "DataManipulation2:Drone13@20s"
+      ]
+    },
+    {
+      "settings": {
+        "MITM_HISTORY": 60,
+        "MITM_FAIL_RATE": 0.75,
+        "MITM_MIN_RTT_S": 0.8
+      },
+      "hits": [
+        "MITM:Drone34@25s"
+      ],
+      "false_positives": [
+        "CriticalNode:Drone42@23s",
+        "CriticalNode:Drone33@26s",
+        "CriticalNode:Drone40@26s",
+        "CriticalNode:Drone8@26s",
+        "CriticalNode:Drone14@27s",
+        "CriticalNode:Drone34@27s",
+        "CriticalNode:Drone36@34s",
+        "MITM:Drone14@29s",
+        "DataManipulation:Drone42@21s",
+        "DataManipulation:Drone40@24s",
+        "DataManipulation:Drone34@26s",
+        "DataManipulation:Drone39@30s",
+        "DataManipulation:Drone14@35s",
+        "DataManipulation:Drone36@62s",
+        "DataManipulation2:Drone36@21s",
+        "DataManipulation2:Drone13@22s",
+        "DataManipulation2:Drone40@22s",
+        "DataManipulation2:Drone7@22s",
+        "DataManipulation2:Drone15@23s",
+        "DataManipulation2:Drone17@117s"
+      ]
+    },
+    {
+      "settings": {
+        "MITM_HISTORY": 60,
+        "MITM_FAIL_RATE": 0.75,
+        "MITM_MIN_RTT_S": 1.0
+      },
+      "hits": [
+        "MITM:Drone34@30s"
+      ],
+      "false_positives": [
+        "CriticalNode:Drone33@26s",
+        "CriticalNode:Drone8@26s",
+        "CriticalNode:Drone34@27s",
+        "CriticalNode:Drone36@34s",
+        "DataManipulation:Drone42@21s",
+        "DataManipulation:Drone40@24s",
+        "DataManipulation:Drone34@26s",
+        "DataManipulation:Drone39@30s",
+        "DataManipulation:Drone36@62s",
+        "DataManipulation2:Drone13@22s",
+        "DataManipulation2:Drone40@22s",
+        "DataManipulation2:Drone7@22s",
+        "DataManipulation2:Drone15@23s"
+      ]
+    },
+    {
+      "settings": {
+        "MITM_HISTORY": 60,
+        "MITM_FAIL_RATE": 0.75,
+        "MITM_MIN_RTT_S": 1.2
+      },
+      "hits": [
+        "MITM:Drone34@30s"
+      ],
+      "false_positives": [
+        "CriticalNode:Drone33@26s",
+        "CriticalNode:Drone8@26s",
+        "CriticalNode:Drone34@27s",
+        "CriticalNode:Drone36@34s",
+        "DataManipulation:Drone42@21s",
+        "DataManipulation:Drone40@24s",
+        "DataManipulation:Drone34@26s",
+        "DataManipulation:Drone39@30s",
+        "DataManipulation2:Drone13@22s",
+        "DataManipulation2:Drone7@22s",
+        "DataManipulation2:Drone15@23s"
+      ]
+    },
+    {
+      "settings": {
+        "MITM_HISTORY": 60,
+        "MITM_FAIL_RATE": 0.8,
+        "MITM_MIN_RTT_S": 0.8
+      },
+      "hits": [
+        "MITM:Drone34@29s"
+      ],
+      "false_positives": [
+        "CriticalNode:Drone42@24s",
+        "CriticalNode:Drone40@26s",
+        "CriticalNode:Drone14@27s",
+        "CriticalNode:Drone33@28s",
+        "CriticalNode:Drone34@28s",
+        "CriticalNode:Drone8@31s",
+        "MITM:Drone14@31s",
+        "DataManipulation:Drone42@22s",
+        "DataManipulation:Drone40@24s",
+        "DataManipulation:Drone34@26s",
+        "DataManipulation:Drone14@49s",
+        "DataManipulation2:Drone36@21s",
+        "DataManipulation2:Drone40@23s",
+        "DataManipulation2:Drone15@29s",
+        "DataManipulation2:Drone17@117s"
+      ]
+    },
+    {
+      "settings": {
+        "MITM_HISTORY": 60,
+        "MITM_FAIL_RATE": 0.8,
+        "MITM_MIN_RTT_S": 1.0
+      },
+      "hits": [
+        "MITM:Drone34@30s"
+      ],
+      "false_positives": [
+        "CriticalNode:Drone33@28s",
+        "CriticalNode:Drone34@28s",
+        "CriticalNode:Drone8@31s",
+        "DataManipulation:Drone42@22s",
+        "DataManipulation:Drone40@24s",
+        "DataManipulation:Drone34@26s",
+        "DataManipulation2:Drone40@23s",
+        "DataManipulation2:Drone15@29s"
+      ]
+    },
+    {
+      "settings": {
+        "MITM_HISTORY": 60,
+        "MITM_FAIL_RATE": 0.8,
+        "MITM_MIN_RTT_S": 1.2
+      },
+      "hits": [
+        "MITM:Drone34@30s"
+      ],
+      "false_positives": [
+        "CriticalNode:Drone33@28s",
+        "CriticalNode:Drone34@28s",
+        "CriticalNode:Drone8@31s",
+        "DataManipulation:Drone42@22s",
+        "DataManipulation:Drone40@24s",
+        "DataManipulation:Drone34@26s",
+        "DataManipulation2:Drone15@29s"
+      ]
+    },
+    {
+      "settings": {
+        "MITM_HISTORY": 60,
+        "MITM_FAIL_RATE": 0.9,
+        "MITM_MIN_RTT_S": 0.8
+      },
+      "hits": [
+        "MITM:Drone34@40s"
+      ],
+      "false_positives": [
+        "CriticalNode:Drone42@27s",
+        "CriticalNode:Drone14@28s",
+        "CriticalNode:Drone40@30s",
+        "CriticalNode:Drone34@31s",
+        "DataManipulation:Drone42@24s",
+        "DataManipulation:Drone40@27s",
+        "DataManipulation:Drone34@43s",
+        "DataManipulation2:Drone36@21s"
+      ]
+    },
+    {
+      "settings": {
+        "MITM_HISTORY": 60,
+        "MITM_FAIL_RATE": 0.9,
+        "MITM_MIN_RTT_S": 1.0
+      },
+      "hits": [
+        "MITM:Drone34@40s"
+      ],
+      "false_positives": [
+        "CriticalNode:Drone34@31s",
+        "DataManipulation:Drone40@27s",
+        "DataManipulation:Drone34@43s"
+      ]
+    },
+    {
+      "settings": {
+        "MITM_HISTORY": 60,
+        "MITM_FAIL_RATE": 0.9,
+        "MITM_MIN_RTT_S": 1.2
+      },
+      "hits": [
+        "MITM:Drone34@40s"
+      ],
+      "false_positives": [
+        "CriticalNode:Drone34@31s",
+        "DataManipulation:Drone40@27s",
+        "DataManipulation:Drone34@43s"
+      ]
+    },
+    {
+      "settings": {
+        "MITM_HISTORY": 100,
+        "MITM_FAIL_RATE": 0.6,
+        "MITM_MIN_RTT_S": 0.8
+      },
+      "hits": [
+        "MITM:Drone34@20s"
+      ],
+      "false_positives": [
+        "CriticalNode:Drone40@19s",
+        "CriticalNode:Drone36@20s",
+        "CriticalNode:Drone33@21s",
+        "CriticalNode:Drone34@21s",
+        "CriticalNode:Drone42@21s",
+        "CriticalNode:Drone14@23s",
+        "CriticalNode:Drone13@24s",
+        "CriticalNode:Drone8@35s",
+        "DataManipulation:Drone36@18s",
+        "DataManipulation:Drone40@19s",
+        "DataManipulation:Drone42@20s",
+        "DataManipulation:Drone13@21s",
+        "DataManipulation:Drone8@24s",
+        "DataManipulation:Drone34@24s",
+        "DataManipulation:Drone39@26s",
+        "DataManipulation:Drone14@31s",
+        "DataManipulation2:Drone40@14s",
+        "DataManipulation2:Drone7@14s",
+        "DataManipulation2:Drone14@15s",
+        "DataManipulation2:Drone15@16s",
+        "DataManipulation2:Drone11@17s",
+        "DataManipulation2:Drone36@20s",
+        "DataManipulation2:Drone13@22s",
+        "DataManipulation2:Drone17@117s"
+      ]
+    },
+    {
+      "settings": {
+        "MITM_HISTORY": 100,
+        "MITM_FAIL_RATE": 0.6,
+        "MITM_MIN_RTT_S": 1.0
+      },
+      "hits": [
+        "MITM:Drone34@30s"
+      ],
+      "false_positives": [
+        "CriticalNode:Drone36@20s",
+        "CriticalNode:Drone33@21s",
+        "CriticalNode:Drone34@21s",
+        "CriticalNode:Drone13@24s",
+        "CriticalNode:Drone8@35s",
+        "DataManipulation:Drone36@18s",
+        "DataManipulation:Drone40@19s",
+        "DataManipulation:Drone42@20s",
+        "DataManipulation:Drone13@21s",
+        "DataManipulation:Drone8@24s",
+        "DataManipulation:Drone34@24s",
+        "DataManipulation:Drone39@26s",
+        "DataManipulation2:Drone40@14s",
+        "DataManipulation2:Drone7@14s",
+        "DataManipulation2:Drone15@16s",
+        "DataManipulation2:Drone13@22s"
+      ]
+    },
+    {
+      "settings": {
+        "MITM_HISTORY": 100,
+        "MITM_FAIL_RATE": 0.6,
+        "MITM_MIN_RTT_S": 1.2
+      },
+      "hits": [
+        "MITM:Drone34@30s"
+      ],
+      "false_positives": [
+        "CriticalNode:Drone36@20s",
+        "CriticalNode:Drone33@21s",
+        "CriticalNode:Drone34@21s",
+        "CriticalNode:Drone13@24s",
+        "CriticalNode:Drone8@35s",
+        "DataManipulation:Drone40@19s",
+        "DataManipulation:Drone42@20s",
+        "DataManipulation:Drone13@21s",
+        "DataManipulation:Drone8@24s",
+        "DataManipulation:Drone34@24s",
+        "DataManipulation:Drone39@26s",
+        "DataManipulation2:Drone7@14s",
+        "DataManipulation2:Drone15@16s",
+        "DataManipulation2:Drone13@22s"
+      ]
+    },
+    {
+      "settings": {
+        "MITM_HISTORY": 100,
+        "MITM_FAIL_RATE": 0.7,
+        "MITM_MIN_RTT_S": 0.8
+      },
+      "hits": [
+        "MITM:Drone34@24s"
+      ],
+      "false_positives": [
+        "CriticalNode:Drone34@25s",
+        "CriticalNode:Drone14@27s",
+        "CriticalNode:Drone40@27s",
+        "CriticalNode:Drone13@30s",
+        "CriticalNode:Drone42@33s",
+        "DataManipulation:Drone42@22s",
+        "DataManipulation:Drone40@25s",
+        "DataManipulation:Drone36@27s",
+        "DataManipulation2:Drone15@18s",
+        "DataManipulation2:Drone36@20s"
+      ]
+    },
+    {
+      "settings": {
+        "MITM_HISTORY": 100,
+        "MITM_FAIL_RATE": 0.7,
+        "MITM_MIN_RTT_S": 1.0
+      },
+      "hits": [
+        "MITM:Drone34@30s"
+      ],
+      "false_positives": [
+        "CriticalNode:Drone34@25s",
+        "CriticalNode:Drone13@30s",
+        "DataManipulation:Drone42@22s",
+        "DataManipulation:Drone40@25s",
+        "DataManipulation:Drone36@27s",
+        "DataManipulation2:Drone15@18s"
+      ]
+    },
+    {
+      "settings": {
+        "MITM_HISTORY": 100,
+        "MITM_FAIL_RATE": 0.7,
+        "MITM_MIN_RTT_S": 1.2
+      },
+      "hits": [
+        "MITM:Drone34@30s"
+      ],
+      "false_positives": [
+        "CriticalNode:Drone34@25s",
+        "CriticalNode:Drone13@30s",
+        "DataManipulation:Drone42@22s",
+        "DataManipulation:Drone40@25s",
+        "DataManipulation2:Drone15@18s"
+      ]
+    },
+    {
+      "settings": {
+        "MITM_HISTORY": 100,
+        "MITM_FAIL_RATE": 0.75,
+        "MITM_MIN_RTT_S": 0.8
+      },
+      "hits": [
+        "MITM:Drone34@26s"
+      ],
+      "false_positives": [
+        "DataManipulation:Drone42@27s",
+        "DataManipulation2:Drone36@23s"
+      ]
+    },
+    {
+      "settings": {
+        "MITM_HISTORY": 100,
+        "MITM_FAIL_RATE": 0.75,
+        "MITM_MIN_RTT_S": 1.0
+      },
+      "hits": [
+        "MITM:Drone34@33s"
+      ],
+      "false_positives": []
+    },
+    {
+      "settings": {
+        "MITM_HISTORY": 100,
+        "MITM_FAIL_RATE": 0.75,
+        "MITM_MIN_RTT_S": 1.2
+      },
+      "hits": [
+        "MITM:Drone34@33s"
+      ],
+      "false_positives": []
+    },
+    {
+      "settings": {
+        "MITM_HISTORY": 100,
+        "MITM_FAIL_RATE": 0.8,
+        "MITM_MIN_RTT_S": 0.8
+      },
+      "hits": [
+        "MITM:Drone34@37s"
+      ],
+      "false_positives": [
+        "DataManipulation:Drone42@31s",
+        "DataManipulation2:Drone36@24s"
+      ]
+    },
+    {
+      "settings": {
+        "MITM_HISTORY": 100,
+        "MITM_FAIL_RATE": 0.8,
+        "MITM_MIN_RTT_S": 1.0
+      },
+      "hits": [
+        "MITM:Drone34@37s"
+      ],
+      "false_positives": []
+    },
+    {
+      "settings": {
+        "MITM_HISTORY": 100,
+        "MITM_FAIL_RATE": 0.8,
+        "MITM_MIN_RTT_S": 1.2
+      },
+      "hits": [
+        "MITM:Drone34@37s"
+      ],
+      "false_positives": []
+    },
+    {
+      "settings": {
+        "MITM_HISTORY": 100,
+        "MITM_FAIL_RATE": 0.9,
+        "MITM_MIN_RTT_S": 0.8
+      },
+      "hits": [
+        "MITM:Drone34@108s"
+      ],
+      "false_positives": [
+        "DataManipulation2:Drone36@25s"
+      ]
+    },
+    {
+      "settings": {
+        "MITM_HISTORY": 100,
+        "MITM_FAIL_RATE": 0.9,
+        "MITM_MIN_RTT_S": 1.0
+      },
+      "hits": [
+        "MITM:Drone34@108s"
+      ],
+      "false_positives": []
+    },
+    {
+      "settings": {
+        "MITM_HISTORY": 100,
+        "MITM_FAIL_RATE": 0.9,
+        "MITM_MIN_RTT_S": 1.2
+      },
+      "hits": [
+        "MITM:Drone34@108s"
+      ],
+      "false_positives": []
+    },
+    {
+      "settings": {
+        "MITM_HISTORY": 150,
+        "MITM_FAIL_RATE": 0.6,
+        "MITM_MIN_RTT_S": 0.8
+      },
+      "hits": [
+        "MITM:Drone34@21s"
+      ],
+      "false_positives": [
+        "CriticalNode:Drone34@25s",
+        "CriticalNode:Drone14@28s",
+        "CriticalNode:Drone36@28s",
+        "CriticalNode:Drone33@30s",
+        "DataManipulation:Drone36@24s",
+        "DataManipulation:Drone42@26s",
+        "DataManipulation:Drone40@26s",
+        "DataManipulation:Drone34@30s",
+        "DataManipulation:Drone13@32s",
+        "DataManipulation2:Drone36@20s",
+        "DataManipulation2:Drone40@21s",
+        "DataManipulation2:Drone15@23s",
+        "DataManipulation2:Drone7@24s"
+      ]
+    },
+    {
+      "settings": {
+        "MITM_HISTORY": 150,
+        "MITM_FAIL_RATE": 0.6,
+        "MITM_MIN_RTT_S": 1.0
+      },
+      "hits": [
+        "MITM:Drone34@30s"
+      ],
+      "false_positives": [
+        "CriticalNode:Drone34@25s",
+        "CriticalNode:Drone36@28s",
+        "CriticalNode:Drone33@30s",
+        "DataManipulation:Drone36@24s",
+        "DataManipulation:Drone40@26s",
+        "DataManipulation:Drone34@30s",
+        "DataManipulation:Drone13@32s",
+        "DataManipulation2:Drone40@21s",
+        "DataManipulation2:Drone15@23s",
+        "DataManipulation2:Drone7@24s"
+      ]
+    },
+    {
+      "settings": {
+        "MITM_HISTORY": 150,
+        "MITM_FAIL_RATE": 0.6,
+        "MITM_MIN_RTT_S": 1.2
+      },
+      "hits": [
+        "MITM:Drone34@30s"
+      ],
+      "false_positives": [
+        "CriticalNode:Drone34@25s",
+        "CriticalNode:Drone36@28s",
+        "CriticalNode:Drone33@30s",
+        "DataManipulation:Drone40@26s",
+        "DataManipulation:Drone34@30s",
+        "DataManipulation:Drone13@32s",
+        "DataManipulation2:Drone15@23s",
+        "DataManipulation2:Drone7@24s"
+      ]
+    },
+    {
+      "settings": {
+        "MITM_HISTORY": 150,
+        "MITM_FAIL_RATE": 0.7,
+        "MITM_MIN_RTT_S": 0.8
+      },
+      "hits": [
+        "MITM:Drone34@79s"
+      ],
+      "false_positives": [
+        "DataManipulation2:Drone36@21s"
+      ]
+    },
+    {
+      "settings": {
+        "MITM_HISTORY": 150,
+        "MITM_FAIL_RATE": 0.7,
+        "MITM_MIN_RTT_S": 1.0
+      },
+      "hits": [
+        "MITM:Drone34@79s"
+      ],
+      "false_positives": []
+    },
+    {
+      "settings": {
+        "MITM_HISTORY": 150,
+        "MITM_FAIL_RATE": 0.7,
+        "MITM_MIN_RTT_S": 1.2
+      },
+      "hits": [
+        "MITM:Drone34@79s"
+      ],
+      "false_positives": []
+    },
+    {
+      "settings": {
+        "MITM_HISTORY": 150,
+        "MITM_FAIL_RATE": 0.75,
+        "MITM_MIN_RTT_S": 0.8
+      },
+      "hits": [
+        "MITM:Drone34@95s"
+      ],
+      "false_positives": [
+        "DataManipulation2:Drone36@21s"
+      ]
+    },
+    {
+      "settings": {
+        "MITM_HISTORY": 150,
+        "MITM_FAIL_RATE": 0.75,
+        "MITM_MIN_RTT_S": 1.0
+      },
+      "hits": [
+        "MITM:Drone34@95s"
+      ],
+      "false_positives": []
+    },
+    {
+      "settings": {
+        "MITM_HISTORY": 150,
+        "MITM_FAIL_RATE": 0.75,
+        "MITM_MIN_RTT_S": 1.2
+      },
+      "hits": [
+        "MITM:Drone34@95s"
+      ],
+      "false_positives": []
+    },
+    {
+      "settings": {
+        "MITM_HISTORY": 150,
+        "MITM_FAIL_RATE": 0.8,
+        "MITM_MIN_RTT_S": 0.8
+      },
+      "hits": [
+        "MITM:Drone34@132s"
+      ],
+      "false_positives": [
+        "DataManipulation2:Drone36@25s"
+      ]
+    },
+    {
+      "settings": {
+        "MITM_HISTORY": 150,
+        "MITM_FAIL_RATE": 0.8,
+        "MITM_MIN_RTT_S": 1.0
+      },
+      "hits": [
+        "MITM:Drone34@132s"
+      ],
+      "false_positives": []
+    },
+    {
+      "settings": {
+        "MITM_HISTORY": 150,
+        "MITM_FAIL_RATE": 0.8,
+        "MITM_MIN_RTT_S": 1.2
+      },
+      "hits": [
+        "MITM:Drone34@132s"
+      ],
+      "false_positives": []
+    },
+    {
+      "settings": {
+        "MITM_HISTORY": 150,
+        "MITM_FAIL_RATE": 0.9,
+        "MITM_MIN_RTT_S": 0.8
+      },
+      "hits": [],
+      "false_positives": []
+    },
+    {
+      "settings": {
+        "MITM_HISTORY": 150,
+        "MITM_FAIL_RATE": 0.9,
+        "MITM_MIN_RTT_S": 1.0
+      },
+      "hits": [],
+      "false_positives": []
+    },
+    {
+      "settings": {
+        "MITM_HISTORY": 150,
+        "MITM_FAIL_RATE": 0.9,
+        "MITM_MIN_RTT_S": 1.2
+      },
+      "hits": [],
+      "false_positives": []
+    }
+  ],
+  "DATA_MANIPULATION": [
+    {
+      "settings": {
+        "DM_CONSECUTIVE": 1
+      },
+      "hits": [
+        "DataManipulation:Drone35@5s",
+        "DataManipulation2:Drone37@-144s"
+      ],
+      "false_positives": [
+        "CriticalNode:Drone31@-253s",
+        "CriticalNode:Drone1@-237s",
+        "CriticalNode:Drone19@-149s",
+        "CriticalNode:Drone37@-144s",
+        "CriticalNode:Drone13@-140s",
+        "CriticalNode:Drone25@-94s",
+        "CriticalNode:Drone51@-14s",
+        "CriticalNode:Drone6@-13s",
+        "CriticalNode:Drone53@-12s",
+        "CriticalNode:Drone4@-12s",
+        "CriticalNode:Drone54@-11s",
+        "CriticalNode:Drone52@-11s",
+        "CriticalNode:Drone5@-11s",
+        "CriticalNode:Drone3@2s",
+        "CriticalNode:Drone2@2s",
+        "CriticalNode:Drone7@74s",
+        "CriticalNode:Drone46@225s",
+        "CriticalNode:Drone33@232s",
+        "MITM:Drone31@-253s",
+        "MITM:Drone1@-237s",
+        "MITM:Drone19@-149s",
+        "MITM:Drone37@-144s",
+        "MITM:Drone13@-140s",
+        "MITM:Drone25@-94s",
+        "MITM:Drone51@-14s",
+        "MITM:Drone6@-13s",
+        "MITM:Drone53@-12s",
+        "MITM:Drone4@-12s",
+        "MITM:Drone54@-11s",
+        "MITM:Drone52@-11s",
+        "MITM:Drone5@-11s",
+        "MITM:Drone3@1s",
+        "MITM:Drone2@1s",
+        "MITM:Drone7@31s",
+        "MITM:Drone43@386s",
+        "DataManipulation:Drone31@-253s",
+        "DataManipulation:Drone1@-237s",
+        "DataManipulation:Drone19@-149s",
+        "DataManipulation:Drone37@-144s",
+        "DataManipulation:Drone13@-140s",
+        "DataManipulation:Drone25@-94s",
+        "DataManipulation:Drone51@-14s",
+        "DataManipulation:Drone6@-13s",
+        "DataManipulation:Drone53@-12s",
+        "DataManipulation:Drone4@-12s",
+        "DataManipulation:Drone54@-11s",
+        "DataManipulation:Drone52@-11s",
+        "DataManipulation:Drone5@-11s",
+        "DataManipulation:Drone2@2s",
+        "DataManipulation:Drone3@3s",
+        "DataManipulation:Drone32@249s",
+        "DataManipulation:Drone36@250s",
+        "DataManipulation:Drone33@252s",
+        "DataManipulation:Drone50@252s",
+        "DataManipulation:Drone34@252s",
+        "DataManipulation2:Drone31@-253s",
+        "DataManipulation2:Drone1@-237s",
+        "DataManipulation2:Drone19@-149s",
+        "DataManipulation2:Drone13@-140s",
+        "DataManipulation2:Drone25@-94s",
+        "DataManipulation2:Drone51@-14s",
+        "DataManipulation2:Drone6@-13s",
+        "DataManipulation2:Drone53@-12s",
+        "DataManipulation2:Drone4@-12s",
+        "DataManipulation2:Drone54@-11s",
+        "DataManipulation2:Drone52@-11s",
+        "DataManipulation2:Drone5@-11s",
+        "DataManipulation2:Drone2@2s",
+        "DataManipulation2:Drone3@3s",
+        "DataManipulation2:Drone7@190s",
+        "DataManipulation2:Drone34@196s",
+        "DataManipulation2:Drone49@198s",
+        "DataManipulation2:Drone36@203s",
+        "Sybil:Drone31@-253s",
+        "Sybil:Drone1@-237s",
+        "Sybil:Drone19@-149s",
+        "Sybil:Drone37@-144s",
+        "Sybil:Drone13@-140s",
+        "Sybil:Drone25@-94s",
+        "Sybil:Drone51@-14s",
+        "Sybil:Drone6@-13s",
+        "Sybil:Drone53@-12s",
+        "Sybil:Drone4@-12s",
+        "Sybil:Drone54@-11s",
+        "Sybil:Drone52@-11s",
+        "Sybil:Drone5@-11s",
+        "Sybil:Drone33@8s",
+        "Sybil:Drone22@124s",
+        "Sybil:Drone42@202s",
+        "Sybil:Drone41@202s",
+        "Sybil:Drone35@203s",
+        "_heldout:Drone19@-122s",
+        "_heldout:Drone43@-120s",
+        "_heldout:Drone31@-120s",
+        "_heldout:Drone24@-120s",
+        "_heldout:Drone21@-120s",
+        "_heldout:Drone7@-100s",
+        "_heldout:Drone42@-92s",
+        "_heldout:Drone45@-89s",
+        "_heldout:Drone49@-86s",
+        "_heldout:Drone54@-51s",
+        "_heldout:Drone52@-48s",
+        "_heldout:Drone51@-44s"
+      ]
+    },
+    {
+      "settings": {
+        "DM_CONSECUTIVE": 2
+      },
+      "hits": [
+        "DataManipulation:Drone35@6s",
+        "DataManipulation2:Drone37@0s"
+      ],
+      "false_positives": []
+    },
+    {
+      "settings": {
+        "DM_CONSECUTIVE": 3
+      },
+      "hits": [
+        "DataManipulation:Drone35@7s",
+        "DataManipulation2:Drone37@0s"
+      ],
+      "false_positives": []
+    },
+    {
+      "settings": {
+        "DM_CONSECUTIVE": 5
+      },
+      "hits": [
+        "DataManipulation:Drone35@7s",
+        "DataManipulation2:Drone37@2s"
+      ],
+      "false_positives": []
+    },
+    {
+      "settings": {
+        "DM_CONSECUTIVE": 10
+      },
+      "hits": [
+        "DataManipulation:Drone35@8s",
+        "DataManipulation2:Drone37@3s"
+      ],
+      "false_positives": []
+    },
+    {
+      "settings": {
+        "DM_CONSECUTIVE": 20
+      },
+      "hits": [
+        "DataManipulation:Drone35@9s",
+        "DataManipulation2:Drone37@4s"
+      ],
+      "false_positives": []
+    },
+    {
+      "settings": {
+        "DM_CONSECUTIVE": 30
+      },
+      "hits": [
+        "DataManipulation2:Drone37@11s"
+      ],
+      "false_positives": []
+    }
+  ],
+  "SYBIL": [
+    {
+      "settings": {
+        "SYBIL_MIN_REQUESTS": 1
+      },
+      "hits": [
+        "Sybil:Ghost5@0s",
+        "Sybil:Ghost1@0s",
+        "Sybil:Ghost6@0s",
+        "Sybil:Ghost2@0s",
+        "Sybil:Ghost7@0s",
+        "Sybil:Ghost3@0s",
+        "Sybil:Ghost8@0s",
+        "Sybil:Ghost4@0s"
+      ],
+      "false_positives": []
+    },
+    {
+      "settings": {
+        "SYBIL_MIN_REQUESTS": 5
+      },
+      "hits": [
+        "Sybil:Ghost1@0s",
+        "Sybil:Ghost2@0s",
+        "Sybil:Ghost3@0s",
+        "Sybil:Ghost4@0s",
+        "Sybil:Ghost5@0s",
+        "Sybil:Ghost6@0s",
+        "Sybil:Ghost7@0s",
+        "Sybil:Ghost8@0s"
+      ],
+      "false_positives": []
+    },
+    {
+      "settings": {
+        "SYBIL_MIN_REQUESTS": 20
+      },
+      "hits": [
+        "Sybil:Ghost1@0s",
+        "Sybil:Ghost3@0s",
+        "Sybil:Ghost2@0s",
+        "Sybil:Ghost6@0s",
+        "Sybil:Ghost4@0s",
+        "Sybil:Ghost5@0s",
+        "Sybil:Ghost7@0s",
+        "Sybil:Ghost8@0s"
+      ],
+      "false_positives": []
+    },
+    {
+      "settings": {
+        "SYBIL_MIN_REQUESTS": 100
+      },
+      "hits": [
+        "Sybil:Ghost2@4s",
+        "Sybil:Ghost7@5s",
+        "Sybil:Ghost1@5s",
+        "Sybil:Ghost3@6s",
+        "Sybil:Ghost8@7s",
+        "Sybil:Ghost6@7s",
+        "Sybil:Ghost4@7s",
+        "Sybil:Ghost5@8s"
+      ],
+      "false_positives": []
+    }
+  ]
+}

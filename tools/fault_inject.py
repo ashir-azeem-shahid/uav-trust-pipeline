@@ -111,8 +111,9 @@ def run(fault: str | None, rate: float, seed: int, attack: str) -> dict:
             can_check = (h is not None and h.last_pos is not None
                          and h.last_t is not None and msg["t_session"] - h.last_t > 0)
         v = pipe.handle(msg)
-        if v and v.get("verdict") == "SUPPRESSION":
+        if v and v.get("track") == "A":
             verdicts.append({"drone": v["drone"], "t": v["t_session"],
+                             "rule": v["verdict"],
                              "delay_s": v.get("detection_delay_s")})
         if msg["role"] != "target":
             return
